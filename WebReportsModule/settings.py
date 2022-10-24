@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'reports.apps.ReportsConfig',
     'crispy_forms',
+    'spurl',
 ]
 
 MIDDLEWARE = [

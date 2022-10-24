@@ -1,4 +1,5 @@
 {% load static %}
+{% load spurl %}
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -28,9 +29,55 @@
     <br>
     <div class="container-fluid">
         <h1>Отчёты!!!</h1>
-    {% for t in tables %}
-        <p>t</p>
-    {% endfor %}
+        <div class="table-responsive">
+            <table id="tag" class="table table-bordered table-sm align-middle table-hover">
+                <thead class="align-middle table-primary">
+                <tr>
+                    <th scope="col">ID_DESK</th>
+                    <th scope="col">ID_BILL</th>
+                    <th scope="col">DATE_CHANCGE</th>
+                    <th scope="col">OPERATION_SUM</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for t in page_m %}
+                    <tr>
+                        <td scope="row">{{ t.0 }}</td>
+                        <td>{{ t.1 }}</td>
+                        <td>{{ t.2 }}</td>
+                        <td>{{ t.3 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if page_m.has_previous %}
+                        <li class="page-item"><a class="page-link"
+                                                 href="{% spurl query=request.GET set_query='page=1' %}">&laquo;
+                            Первая</a></li>
+                    {% endif %}
+
+                    {% for pa in page_m.paginator.page_range %}
+                        {% if pa == page_m.number %}
+                            <li class="page-item"><a class="page-link active"
+                                                     href="{% spurl query=request.GET set_query='page={{ pa }}' %}">{{ pa }}</a>
+                            </li>
+                        {% elif pa >= page_m.number|add:-2 and pa <= page_m.number|add:2 %}
+                            <li class="page-item"><a class="page-link"
+                                                     href="{% spurl query=request.GET set_query='page={{ pa }}' %}">{{ pa }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_m.has_next %}
+                        <li class="page-item"><a class="page-link"
+                                                 href="{% spurl query=request.GET set_query='page={{ page_m.paginator.num_pages }}' %}">Последняя
+                            &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
     </div>
 {% else %}
     <div class="container-fluid">
