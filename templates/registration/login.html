@@ -1,0 +1,21 @@
+<!-- templates/registration/login.html -->
+{% extends 'reports/index.html' %} &nbsp;
+{% block content %}
+    {% load crispy_forms_filters %}
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+            <h4 class="card-title">Войти в систему</h4>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    {{ form|crispy }}
+                    <br>
+                    <button type="submit" class="btn btn-primary btn-block">Войти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
