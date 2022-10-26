@@ -6,19 +6,21 @@
             <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
                 <thead class="align-middle table-primary">
                 <tr>
-                    <th scope="col">ID_DESK</th>
-                    <th scope="col">ID_BILL</th>
-                    <th scope="col">DATE_CHANCGE</th>
-                    <th scope="col">OPERATION_SUM</th>
+                    <th scope="col">Касса</th>
+                    <th scope="col">Счёт</th>
+                    <th scope="col">Тип оплаты регистратора</th>
+                    <th scope="col">Дата изменения операции</th>
+                    <th scope="col">Сумма оплаты</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody class="table-group-divider">
                 {% for t in page_m %}
-                    <tr>
+                    <tr class="align-middle">
                         <td scope="row">{{ t.0 }}</td>
                         <td>{{ t.1 }}</td>
                         <td>{{ t.2 }}</td>
                         <td>{{ t.3 }}</td>
+                        <td>{{ t.4 }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

@@ -1,7 +1,8 @@
 import fdb
+import pymysql
 from django.core.paginator import Paginator
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from sshtunnel import SSHTunnelForwarder
 
 from reports.forms import TicketSales
 
@@ -35,7 +36,14 @@ def ticket_sales(request):
             con = fdb.connect(dsn='213.208.176.194/43050:volen', user='sysdba', password='masterkey',
                               charset="win1251")
             cur = con.cursor()
-            tables = cur.execute('select ID_DESK, ID_BILL, DATE_CHANGE, OPERATION_SUM from "DESK$OPERATIONS" where DATE_CHANGE >= (?) and DATE_CHANGE <= (?)',(start_d, end_d)).fetchall()
+            tables = cur.execute(
+                'select '
+                'ID_DESK, ID_BILL, PAY_TYPE, DATE_CHANGE, OPERATION_SUM '
+                'from "DESK$OPERATIONS" '
+                'where DATE_CHANGE >= (?) and DATE_CHANGE <= (?)',
+                (start_d, end_d)
+            ).fetchall()
+
             con.commit()
             con.close()
 
@@ -53,4 +61,35 @@ def ticket_sales(request):
 
 
 def passages_through_turnstiles(request):
-    pass
+    page_number = request.GET.get("page")
+    result = ""
+    with SSHTunnelForwarder(
+            ('5.253.62.211', 22),
+            ssh_password="5hz2Q6Z5RX82YfqlnS",
+            ssh_username="root",
+            remote_bind_address=('127.0.0.1', 3306)) as server:
+        con = None
+
+        con = pymysql.connect(
+            user='mikhailrozenberg',
+            passwd='Rozen_9635352',
+            db='baloon',
+            host='127.0.0.1',
+            port=server.local_bind_port
+        )
+
+        cur = con.cursor()
+
+        cur.execute("SELECT id, userTokenID, email FROM Person")
+        result = cur.fetchall()
+
+        con.close()
+
+    page_model = Paginator(result, 10)
+    page_m = page_model.get_page(page_number)
+
+    data = {
+        "page_m": page_m
+    }
+
+    return render(request, "reports/passages_throw_turnstiles.html", data)
