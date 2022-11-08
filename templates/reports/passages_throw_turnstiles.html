@@ -38,6 +38,7 @@
     </nav>
     <br>
     <div class="container back">
+        <br>
         <h1>Отчёт по проходам через турникеты</h1>
         <br>
         <hr>
@@ -45,9 +46,13 @@
             <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
                 <thead class="align-middle table-primary">
                 <tr>
-                    <th scope="col">id</th>
-                    <th scope="col">userTokenID</th>
-                    <th scope="col">email</th>
+                    <th scope="col">personid</th>
+                    <th scope="col">name</th>
+                    <th scope="col">permanent_rulename</th>
+                    <th scope="col">clientoid</th>
+                    <th scope="col">status</th>
+                    <th scope="col">comment</th>
+                    <th scope="col">DateArc</th>
                 </tr>
                 </thead>
                 <tbody class="table-group-divider">
@@ -56,6 +61,10 @@
                         <td scope="row">{{ t.0 }}</td>
                         <td>{{ t.1 }}</td>
                         <td>{{ t.2 }}</td>
+                        <td>{{ t.3 }}</td>
+                        <td>{{ t.4 }}</td>
+                        <td>{{ t.5 }}</td>
+                        <td>{{ t.6 }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

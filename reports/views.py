@@ -21,6 +21,7 @@ def ticket_sales(request):
     end_d = "01.01.01"
     fo = ""
     tables = ""
+    r = ""
 
     if ticket_form.is_valid():
         filter_ticket = ticket_form.cleaned_data
@@ -33,16 +34,39 @@ def ticket_sales(request):
 
         if filter_ticket != {'start_date': None, 'end_date': None}:
             fo = "yes"
-            con = fdb.connect(dsn='213.208.176.194/43050:volen', user='sysdba', password='masterkey',
+            con = fdb.connect(dsn='213.208.176.194/43050:spd_showmaket', user='sysdba', password='masterkey',
                               charset="win1251")
             cur = con.cursor()
+
+            # Вывод всех таблиц
+
+            # r = cur.execute('SELECT '
+            #                 'a.RDB$RELATION_NAME '
+            #                 'FROM RDB$RELATIONS a '
+            #                 'WHERE COALESCE(RDB$SYSTEM_FLAG, 0) = 0 AND RDB$RELATION_TYPE = 0'
+            #                 ).fetchall()
+
             tables = cur.execute(
-                'select '
-                'ID_DESK, ID_BILL, PAY_TYPE, DATE_CHANGE, OPERATION_SUM '
-                'from "DESK$OPERATIONS" '
-                'where DATE_CHANGE >= (?) and DATE_CHANGE <= (?)',
-                (start_d, end_d)
+                "select "
+                "* "
+                "from EMP$TIMESHEETS "
+                # "where OPERATION_TIMESTAMP >= '2022-10-27 00:00:00';"
             ).fetchall()
+
+            # Вывод всех столбцов
+
+            r = cur.execute(
+                "select "
+                "rdb$field_name "
+                "from rdb$relation_fields "
+                "where rdb$relation_name = 'EMP$TIMESHEETS ';"
+            ).fetchall()
+
+            for i in tables:
+                print(i)
+
+            for i in r:
+                print(i)
 
             con.commit()
             con.close()
@@ -52,9 +76,9 @@ def ticket_sales(request):
 
         data = {
             "ticket_form": ticket_form,
-            "tables": tables,
             "fo": fo,
-            "page_m": page_m
+            "page_m": page_m,
+            "r": r
         }
 
         return render(request, "reports/result_ticket_sales.html", data)
@@ -80,7 +104,7 @@ def passages_through_turnstiles(request):
 
         cur = con.cursor()
 
-        cur.execute("SELECT id, userTokenID, email FROM Person")
+        cur.execute("SELECT personid, name, permanent_rulename, clientoid, status, comment, DateArc FROM Identifier")
         result = cur.fetchall()
 
         con.close()
