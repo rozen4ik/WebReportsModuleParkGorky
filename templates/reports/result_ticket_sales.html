@@ -3,6 +3,10 @@
 {% load spurl %}
 {% block result %}
     <div class="table-responsive">
+        <form method="POST">
+            <a class="btn btn-primary" href="{% url 'export-stat-bill' %}" role="button">Скачать отчёт</a>
+            <p></p>
+        </form>
         <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
             <thead class="align-middle table-primary">
             <tr>

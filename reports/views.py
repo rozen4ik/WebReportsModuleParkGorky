@@ -1,7 +1,11 @@
+import datetime
+
 import fdb
 import pymysql
+import xlwt
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 from django.shortcuts import render
 from sshtunnel import SSHTunnelForwarder
 from bs4 import BeautifulSoup
@@ -9,6 +13,7 @@ from bs4 import BeautifulSoup
 from configuration.models import Conf
 from reports.forms import TicketSales
 from reports.models import Kontur, Baloon
+from reports.services.report_xls import ReportXLS
 
 
 def index(request):
@@ -186,3 +191,41 @@ def pars_table(trs, tag):
         count = 0
     kontur = Kontur.objects.all()
     kontur = kontur[0].delete()
+
+
+def export_stat_bill(request):
+    response = HttpResponse(content_type="applications/ms-excel")
+    date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    response["Content-Disposition"] = "attachment; filename=StatBill " + str(date) + ".xls"
+
+    wb = xlwt.Workbook(encoding="utf-8")
+    ws = wb.add_sheet("report")
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = [
+        "Дата продажи",
+        "ID билета",
+        "Тариф",
+        "Дата действия билета",
+        "Дата прохода по билету"
+    ]
+
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+
+    report_xls = ReportXLS()
+    kontur = report_xls.get_stat_bill(Kontur.objects.all().order_by("date_bill"))
+    rows = kontur
+    print(rows)
+
+    for row in rows:
+        row_num += 1
+        print(row)
+        for col_num in range(len(row)):
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+    wb.save(response)
+
+    return response
