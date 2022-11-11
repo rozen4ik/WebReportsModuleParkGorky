@@ -1,0 +1,135 @@
+{% load static %}
+{% load spurl %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки</title>
+    <link rel="stylesheet" href="{% static 'css/body.css' %}" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+<body>
+{% if user.is_authenticated %}
+    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <div class="navbar-collapse" id="navbarScroll">
+                <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}" role="button">Выйти
+                    - {{ user.first_name }} {{ user.last_name }} </a>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Главная</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
+                           aria-expanded="false">Отчёты</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/ticket_sales/">Продажа билетов</a></li>
+                            <li><a class="dropdown-item" href="/passages_through_turnstiles/">Проходы через
+                                турникеты</a></li>
+                        </ul>
+                    </li>
+                    {% if access == "yes" %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/configuration/edit/1/">Настройки</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <div class="container back">
+        <br>
+        <h1>Настройки</h1>
+        <br>
+        <hr>
+        <form class="row g-3" method="POST">
+            {% csrf_token %}
+            <div class="col-md-3">
+                <label for="inputIpKontur" class="form-label">ip контура</label>
+                <input type="text" class="form-control" id="inputIpKontur" name="ip_kontur"
+                       value="{{ config.ip_kontur }}" required />
+            </div>
+            <div class="col-md-2">
+                <label for="inputPortKontur" class="form-label">порт контура</label>
+                <input type="text" class="form-control" id="inputPortKontur" name="port_kontur"
+                       value="{{ config.port_kontur }}" required />
+            </div>
+            <div class="col-md-4">
+                <label for="inputPath" class="form-label">путь к бд или алиас контура</label>
+                <input type="text" class="form-control" id="inputPath" name="path_to_db_kontur"
+                       value="{{ config.path_to_db_kontur }}" required />
+            </div>
+            <div class="col-md-3">
+                <label for="inputUserDbKontur" class="form-label">логин для доступа к контуру</label>
+                <input type="text" class="form-control" id="inputUserDbKontur" name="user_db_kontur"
+                       value="{{ config.user_db_kontur }}" required />
+            </div>
+            <div class="col-md-3">
+                <label for="inputPassDbKontur" class="form-label">пароль для доступа к контуру</label>
+                <input type="text" class="form-control" id="inputPassDbKontur" name="password_db_kontur"
+                       value="{{ config.password_db_kontur }}" required />
+            </div>
+            <div class="col-md-3">
+                <label for="inputIpSSH" class="form-label">ip для доступа по ssh к балону</label>
+                <input type="text" class="form-control" id="inputIpSSH" name="ip_ssh"
+                       value="{{ config.ip_ssh }}" required />
+            </div>
+            <div class="col-md-3">
+                <label for="inputUserSSH" class="form-label">логин для доступа по ssh к балону</label>
+                <input type="text" class="form-control" id="inputUserSSH" name="user_ssh"
+                       value="{{ config.user_ssh }}" required />
+            </div>
+            <div class="col-md-3">
+                <label for="inputPassSSH" class="form-label">пароль для доступа по ssh к балону</label>
+                <input type="text" class="form-control" id="inputPassSSH" name="password_ssh"
+                       value="{{ config.password_ssh }}" required />
+            </div>
+            <div class="col-md-3">
+                <label for="inputUserDbBaloon" class="form-label">логин для доступа к бд балона</label>
+                <input type="text" class="form-control" id="inputUserDbBaloon" name="user_db_baloon"
+                       value="{{ config.user_db_baloon }}" required />
+            </div>
+            <div class="col-md-3">
+                <label for="inputPassDbBaloon" class="form-label">пароль для доступа к бд балона</label>
+                <input type="text" class="form-control" id="inputPassDbBaloon" name="password_db_baloon"
+                       value="{{ config.password_db_baloon }}" required />
+            </div>
+            <div class="col-12">
+                <input type="submit" name="sun" class="btn btn-outline-primary contact-form__button" value="Сохранить">
+            </div>
+        </form>
+    <br>
+    </div>
+{% else %}
+    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <div class="navbar-collapse" id="navbarScroll">
+                <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}" role="button">Войти</a>
+            </div>
+        </div>
+    </nav>
+    <br>
+{% endif %}
+<br>
+{% block content %}
+{% endblock content %}
+<br>
+<footer class="footer text-muted">
+    <div class="container" style="color: whitesmoke">
+        &copy; Разработано компанией ООО "ЭРТЕЛ" в 2022 году.
+    </div>
+</footer>
+<br>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
+        integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
+        integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy"
+        crossorigin="anonymous"></script>
+</body>
+</html>

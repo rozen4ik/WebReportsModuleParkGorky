@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'reports.apps.ReportsConfig',
     'employee.apps.EmployeeConfig',
+    'configuration.apps.ConfigurationConfig',
     'crispy_forms',
     'spurl',
 ]

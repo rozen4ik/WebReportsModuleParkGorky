@@ -5,6 +5,8 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from sshtunnel import SSHTunnelForwarder
 from bs4 import BeautifulSoup
+
+from configuration.models import Conf
 from reports.forms import TicketSales
 from reports.models import Kontur, Baloon
 
@@ -23,6 +25,7 @@ def index(request):
 def ticket_sales(request):
     if request.user.is_authenticated:
         access = get_access(request)
+        config = Conf.objects.get(id=1)
         page_number = request.GET.get("page")
         ticket_form = TicketSales(request.GET)
         start_d = "01.01.01"
@@ -36,8 +39,12 @@ def ticket_sales(request):
 
             if filter_ticket != {'start_date': None, 'end_date': None}:
                 fo = "yes"
-                con = fdb.connect(dsn='213.208.176.194/43050:spd_showmaket', user='sysdba', password='masterkey',
-                                  charset="win1251")
+                con = fdb.connect(
+                    dsn=f'{config.ip_kontur}/{config.port_kontur}:{config.path_to_db_kontur}',
+                    user=f'{config.user_db_kontur}',
+                    password=f'{config.password_db_kontur}',
+                    charset="win1251"
+                )
                 cur = con.cursor()
 
                 tables = cur.execute(
@@ -66,15 +73,15 @@ def ticket_sales(request):
                 pars_table(trs, 'td')
 
                 with SSHTunnelForwarder(
-                        ('5.253.62.211', 22),
-                        ssh_password="5hz2Q6Z5RX82YfqlnS",
-                        ssh_username="root",
+                        (f'{config.ip_ssh}', 22),
+                        ssh_password=f"{config.password_ssh}",
+                        ssh_username=f"{config.user_ssh}",
                         remote_bind_address=('127.0.0.1', 3306)) as server:
                     con = None
 
                     con = pymysql.connect(
-                        user='mikhailrozenberg',
-                        passwd='Rozen_9635352',
+                        user=f'{config.user_db_baloon}',
+                        passwd=f'{config.password_db_baloon}',
                         db='baloon',
                         host='127.0.0.1',
                         port=server.local_bind_port
