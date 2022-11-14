@@ -1,30 +1,30 @@
-{% extends 'reports/forms/ticket_sales.html' %}
+{% extends 'reports/forms/passages_throw_turnstiles.html' %}
 {% load static %}
 {% load spurl %}
-{% block ticket %}
+{% block passage %}
     <div class="table-responsive">
-        <form method="POST">
-            <a class="btn btn-primary" href="{% url 'export-stat-bill' %}" role="button">Скачать отчёт</a>
-            <p></p>
-        </form>
+        {#        <form method="POST">#}
+        {#            <a class="btn btn-primary" href="{% url 'export-stat-bill' %}" role="button">Скачать отчёт</a>#}
+        {#            <p></p>#}
+        {#        </form>#}
         <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
             <thead class="align-middle table-primary">
             <tr>
-                <th scope="col">Дата продажи</th>
-                <th scope="col">ID билета</th>
-                <th scope="col">Тариф</th>
-                <th scope="col">Дата действия билета</th>
-                <th scope="col">Дата прохода по билету</th>
+                <th scope="col">Дата прохода</th>
+                <th scope="col">Устройство</th>
+                <th scope="col">Откуда</th>
+                <th scope="col">Куда</th>
+                <th scope="col">Индификатор</th>
             </tr>
             </thead>
             <tbody class="table-group-divider">
             {% for t in page_m %}
                 <tr class="align-middle">
-                    <td scope="row">{{ t.date_bill }}</td>
-                    <td>{{ t.id_ticket }}</td>
-                    <td>{{ t.tariff }}</td>
-                    <td>{{ t.ticket_validity_date }}</td>
-                    <td>{{ t.date_of_ticket_passage }}</td>
+                    <td scope="row">{{ t.resolution_timestamp }}</td>
+                    <td>{{ t.id_point }}</td>
+                    <td>{{ t.id_ter_from }}</td>
+                    <td>{{ t.id_ter_to }}</td>
+                    <td>{{ t.identifier_value }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -42,7 +42,8 @@
                 {% for pa in page_m.paginator.page_range %}
                     {% if pa == page_m.number %}
                         <li class="page-item">
-                            <a class="page-link active now_page" href="{% spurl query=request.GET set_query='page={{ pa }}' %}">
+                            <a class="page-link active now_page"
+                               href="{% spurl query=request.GET set_query='page={{ pa }}' %}">
                                 {{ pa }}
                             </a>
                         </li>
@@ -57,7 +58,8 @@
 
                 {% if page_m.has_next %}
                     <li class="page-item">
-                        <a class="page-link last_page" href="{% spurl query=request.GET set_query='page={{ page_m.paginator.num_pages }}' %}">
+                        <a class="page-link last_page"
+                           href="{% spurl query=request.GET set_query='page={{ page_m.paginator.num_pages }}' %}">
                             Последняя&raquo;
                         </a>
                     </li>

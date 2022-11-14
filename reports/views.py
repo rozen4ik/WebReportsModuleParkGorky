@@ -1,18 +1,17 @@
 import datetime
-
 import fdb
 import pymysql
 import xlwt
 from django.contrib.auth.models import User
+from django.core import paginator
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
 from sshtunnel import SSHTunnelForwarder
 from bs4 import BeautifulSoup
-
 from configuration.models import Conf
 from reports.forms import TicketSales
-from reports.models import Kontur, Baloon
+from reports.models import Kontur, Baloon, PassagesTurnstile
 from reports.services.report_xls import ReportXLS
 
 
@@ -32,6 +31,7 @@ def ticket_sales(request):
         access = get_access(request)
         config = Conf.objects.get(id=1)
         page_number = request.GET.get("page")
+        page_m = ""
         ticket_form = TicketSales(request.GET)
         start_d = "01.01.01"
         end_d = "01.01.01"
@@ -44,6 +44,7 @@ def ticket_sales(request):
 
             if filter_ticket != {'start_date': None, 'end_date': None}:
                 fo = "yes"
+
                 con = fdb.connect(
                     dsn=f'{config.ip_kontur}/{config.port_kontur}:{config.path_to_db_kontur}',
                     user=f'{config.user_db_kontur}',
@@ -149,12 +150,67 @@ def ticket_sales(request):
 def passages_through_turnstiles(request):
     if request.user.is_authenticated:
         access = get_access(request)
+        config = Conf.objects.get(id=1)
+        page_number = request.GET.get("page")
+        page_m = ""
+        ticket_form = TicketSales(request.GET)
+        start_d = "01.01.01"
+        end_d = "01.01.01"
+        fo = ""
+
+        if ticket_form.is_valid():
+            filter_ticket = ticket_form.cleaned_data
+            start_d = ticket_form.cleaned_data["start_date"]
+            end_d = ticket_form.cleaned_data["end_date"]
+
+            if filter_ticket != {'start_date': None, 'end_date': None}:
+                fo = "yes"
+                print(filter_ticket)
+
+                con = fdb.connect(
+                    dsn=f'{config.ip_kontur}/{config.port_kontur}:{config.path_to_db_kontur}',
+                    user=f'{config.user_db_kontur}',
+                    password=f'{config.password_db_kontur}',
+                    charset="win1251"
+                )
+
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "RESOLUTION_TIMESTAMP, ID_POINT, ID_TER_FROM, ID_TER_TO, IDENTIFIER_VALUE "
+                    "from "
+                    "IDENT$RESOLUTIONS "
+                    f"where RESOLUTION_TIMESTAMP >= '{start_d}' and RESOLUTION_TIMESTAMP <= '{end_d}'"
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                passages_turnstile = PassagesTurnstile.objects.all().delete()
+
+                for i in tables:
+                    passages_turnstile = PassagesTurnstile()
+                    dt = i[0].strftime("%d.%m.%Y %H:%M")
+                    passages_turnstile.resolution_timestamp = dt
+                    passages_turnstile.id_point = i[1]
+                    passages_turnstile.id_ter_from = i[2]
+                    passages_turnstile.id_ter_to = i[3]
+                    passages_turnstile.identifier_value = i[4]
+                    passages_turnstile.save()
+
+                passages_turnstile = PassagesTurnstile.objects.all().order_by('resolution_timestamp')
+                page_model = Paginator(passages_turnstile, 20)
+                page_m = page_model.get_page(page_number)
+
         data = {
-            "access": access
+            "access": access,
+            "page_m": page_m,
+            "fo": fo,
+            "ticket_form": ticket_form,
         }
     else:
         data = {}
-    return render(request, "reports/passages_throw_turnstiles.html", data)
+    return render(request, "reports/result_passage.html", data)
 
 
 def get_access(request):
@@ -191,6 +247,10 @@ def pars_table(trs, tag):
         count = 0
     kontur = Kontur.objects.all()
     kontur = kontur[0].delete()
+
+
+def is_ajax(request):
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
 
 def export_stat_bill(request):

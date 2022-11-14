@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отчёт по продаже билетов</title>
+    <title>Главная</title>
     <link rel="stylesheet" href="{% static 'css/body.css' %}" type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -21,7 +21,7 @@
                     - {{ user.first_name }} {{ user.last_name }} </a>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Главная</a>
+                        <a class="nav-link active" aria-current="page" href="/static">Главная</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
@@ -43,8 +43,8 @@
     </nav>
     <br>
     <div class="container back">
-    <br>
-    <form class="row g-3" method="get" action="">
+        <br>
+        <form class="row g-3" method="get" action="">
         {% csrf_token %}
         <h3>Укажите временной период</h3>
         <div class="col-md-3">
@@ -67,17 +67,20 @@
         <div id="cont" style="display: none">
     {% else %}
         <div id="cont">
-            {% block result %}
+            {% block passage %}
             {% endblock %}
         </div>
     {% endif %}
-</div>
-{% else %}
-    <div class="container-fluid">
-        <br>
-        <p>Войдите в систему</p>
-        <a class="btn btn-outline-primary" href="{% url 'login' %}" role="button">Войти</a>
     </div>
+{% else %}
+    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <div class="navbar-collapse" id="navbarScroll">
+                <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}" role="button">Войти</a>
+            </div>
+        </div>
+    </nav>
+    <br>
 {% endif %}
 <br>
 {% block content %}

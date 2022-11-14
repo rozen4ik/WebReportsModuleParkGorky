@@ -1,0 +1,100 @@
+{% load static %}
+{% load spurl %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчёт по продаже билетов</title>
+    <link rel="stylesheet" href="{% static 'css/body.css' %}" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+<body>
+{% if user.is_authenticated %}
+    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <div class="navbar-collapse" id="navbarScroll">
+                <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}" role="button">Выйти
+                    - {{ user.first_name }} {{ user.last_name }} </a>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/static">Главная</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
+                           aria-expanded="false">Отчёты</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/ticket_sales/">Продажа билетов</a></li>
+                            <li><a class="dropdown-item" href="/passages_through_turnstiles/">Проходы через
+                                турникеты</a></li>
+                        </ul>
+                    </li>
+                    {% if access == "yes" %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/configuration/edit/1/">Настройки</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <div class="container back">
+    <br>
+    <form class="row g-3" method="get" action="">
+        {% csrf_token %}
+        <h3>Укажите временной период</h3>
+        <div class="col-md-3">
+            <label for="{{ ticket_form.start_date.id_for_label }}">Начало периода</label>
+            {{ ticket_form.start_date }}
+        </div>
+        <div class="col-md-3">
+            <label for="{{ ticket_form.end_date.id_for_label }}">Конец периода</label>
+            {{ ticket_form.end_date }}
+        </div>
+        <div class="col-12">
+            <input type="submit" name="sun" class="btn btn-outline-primary contact-form__button"
+                   value="Подготовить отчёт">
+        </div>
+    </form>
+    <br>
+    <hr>
+    <br>
+    {% if fo != "yes" %}
+        <div id="cont" style="display: none">
+    {% else %}
+        <div id="cont">
+            {% block ticket %}
+            {% endblock %}
+        </div>
+    {% endif %}
+</div>
+{% else %}
+    <div class="container-fluid">
+        <br>
+        <p>Войдите в систему</p>
+        <a class="btn btn-outline-primary" href="{% url 'login' %}" role="button">Войти</a>
+    </div>
+{% endif %}
+<br>
+{% block content %}
+{% endblock content %}
+<br>
+<footer class="footer text-muted">
+    <div class="container" style="color: whitesmoke">
+        &copy; Разработано компанией ООО "ЭРТЕЛ" в 2022 году.
+    </div>
+</footer>
+<br>
+<script src="{% static 'js/pag.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
+        integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
+        integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy"
+        crossorigin="anonymous"></script>
+</body>
+</html>
