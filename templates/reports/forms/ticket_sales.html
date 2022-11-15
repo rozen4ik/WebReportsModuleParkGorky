@@ -26,15 +26,28 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
                            aria-expanded="false">Отчёты</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/ticket_sales/">Продажа билетов</a></li>
-                            <li><a class="dropdown-item" href="/passages_through_turnstiles/">Проходы через
-                                турникеты</a></li>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <li class="dropdown dropend">
+                                <a class="dropdown-item dropdown-toggle" href="#" id="multilevelDropdownMenu1"
+                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Продажи</a>
+                                <ul class="dropdown-menu" aria-labelledby="multilevelDropdownMenu1">
+                                    <li><a class="dropdown-item" href="/ticket_sales/">Билеты</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown dropend">
+                                <a class="dropdown-item dropdown-toggle" href="#" id="multilevelDropdownMenu1"
+                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Проходы</a>
+                                <ul class="dropdown-menu" aria-labelledby="multilevelDropdownMenu1">
+                                    <li><a class="dropdown-item" href="/passages_through_turnstiles/">Через
+                                        турникеты</a></li>
+                                </ul>
+                            </li>
                         </ul>
                     </li>
                     {% if access == "yes" %}
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/configuration/edit/1/">Настройки</a>
+                            <a class="nav-link active" aria-current="page"
+                               href="/configuration/edit/1/">Настройки</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -89,7 +102,7 @@
     </div>
 </footer>
 <br>
-<script src="{% static 'js/pag.js' %}"></script>
+<script src="{% static 'js/droplist.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
         integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
         crossorigin="anonymous"></script>
