@@ -3,7 +3,6 @@ import fdb
 import pymysql
 import xlwt
 from django.contrib.auth.models import User
-from django.core import paginator
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -44,15 +43,8 @@ def ticket_sales(request):
 
             if filter_ticket != {'start_date': None, 'end_date': None}:
                 fo = "yes"
-
-                con = fdb.connect(
-                    dsn=f'{config.ip_kontur}/{config.port_kontur}:{config.path_to_db_kontur}',
-                    user=f'{config.user_db_kontur}',
-                    password=f'{config.password_db_kontur}',
-                    charset="win1251"
-                )
+                con = settings_firebird(config)
                 cur = con.cursor()
-
                 tables = cur.execute(
                     "select "
                     "* "
@@ -165,15 +157,7 @@ def passages_through_turnstiles(request):
 
             if filter_ticket != {'start_date': None, 'end_date': None}:
                 fo = "yes"
-                print(filter_ticket)
-
-                con = fdb.connect(
-                    dsn=f'{config.ip_kontur}/{config.port_kontur}:{config.path_to_db_kontur}',
-                    user=f'{config.user_db_kontur}',
-                    password=f'{config.password_db_kontur}',
-                    charset="win1251"
-                )
-
+                con = settings_firebird(config)
                 cur = con.cursor()
                 tables = cur.execute(
                     "select "
@@ -183,20 +167,41 @@ def passages_through_turnstiles(request):
                     f"where RESOLUTION_TIMESTAMP >= '{start_d}' and RESOLUTION_TIMESTAMP <= '{end_d}'"
                 ).fetchall()
 
-                con.commit()
-                con.close()
-
                 passages_turnstile = PassagesTurnstile.objects.all().delete()
 
                 for i in tables:
                     passages_turnstile = PassagesTurnstile()
                     dt = i[0].strftime("%d.%m.%Y %H:%M")
                     passages_turnstile.resolution_timestamp = dt
-                    passages_turnstile.id_point = i[1]
-                    passages_turnstile.id_ter_from = i[2]
-                    passages_turnstile.id_ter_to = i[3]
+                    point = cur.execute(
+                        "select "
+                        "ID, POINT_TYPE "
+                        "from "
+                        "DEV$POINTS "
+                        f"where ID = '{i[1]}'"
+                    ).fetchall()
+                    passages_turnstile.id_point = point[0][1]
+                    ter_from = cur.execute(
+                        "select "
+                        "ID, CAPTION "
+                        "from "
+                        "DEV$TERRITORIES "
+                        f"where ID = '{i[2]}'"
+                    ).fetchall()
+                    passages_turnstile.id_ter_from = ter_from[0][1]
+                    ter_to = cur.execute(
+                        "select "
+                        "ID, CAPTION "
+                        "from "
+                        "DEV$TERRITORIES "
+                        f"where ID = '{i[3]}'"
+                    ).fetchall()
+                    passages_turnstile.id_ter_to = ter_to[0][1]
                     passages_turnstile.identifier_value = i[4]
                     passages_turnstile.save()
+
+                con.commit()
+                con.close()
 
                 passages_turnstile = PassagesTurnstile.objects.all().order_by('resolution_timestamp')
                 page_model = Paginator(passages_turnstile, 20)
@@ -222,6 +227,16 @@ def get_access(request):
         else:
             access = "no"
         return access
+
+
+def settings_firebird(config):
+    con = fdb.connect(
+        dsn=f'{config.ip_kontur}/{config.port_kontur}:{config.path_to_db_kontur}',
+        user=f'{config.user_db_kontur}',
+        password=f'{config.password_db_kontur}',
+        charset="win1251"
+    )
+    return con
 
 
 def pars_table(trs, tag):
@@ -278,11 +293,45 @@ def export_stat_bill(request):
     report_xls = ReportXLS()
     kontur = report_xls.get_stat_bill(Kontur.objects.all().order_by("date_bill"))
     rows = kontur
-    print(rows)
 
     for row in rows:
         row_num += 1
-        print(row)
+        for col_num in range(len(row)):
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+    wb.save(response)
+
+    return response
+
+
+def export_passage(request):
+    response = HttpResponse(content_type="applications/ms-excel")
+    date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    response["Content-Disposition"] = "attachment; filename=Passage " + str(date) + ".xls"
+
+    wb = xlwt.Workbook(encoding="utf-8")
+    ws = wb.add_sheet("report")
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = [
+        "Дата прохода",
+        "Устройство",
+        "Откуда",
+        "Куда",
+        "Индификатор"
+    ]
+
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+
+    report_xls = ReportXLS()
+    passages_turnstiles = report_xls.get_passage(PassagesTurnstile.objects.all().order_by('resolution_timestamp'))
+    rows = passages_turnstiles
+
+    for row in rows:
+        row_num += 1
         for col_num in range(len(row)):
             ws.write(row_num, col_num, str(row[col_num]), font_style)
 
