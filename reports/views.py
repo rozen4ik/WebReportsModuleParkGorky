@@ -275,9 +275,35 @@ def export_stat_bill(request):
 
     wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet("report")
-    row_num = 0
-    font_style = xlwt.XFStyle()
-    font_style.font.bold = True
+    row_num = 1
+    font_title = xlwt.XFStyle()
+    font_title.font.name = "Times New Roman"
+    font_title.font.height = 20 * 14
+    font_title.font.bold = True
+    font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_title.alignment.horz = font_title.alignment.HORZ_CENTER
+    col_pat = xlwt.Pattern()
+    col_pat.pattern = col_pat.SOLID_PATTERN
+    col_pat.pattern_fore_colour = 22
+    col_pat.pattern_back_colour = 4
+    font_title.pattern = col_pat
+    font_title.borders.top = font_title.borders.THIN
+    font_title.borders.bottom = font_title.borders.THIN
+    font_title.borders.left = font_title.borders.THIN
+    font_title.borders.right = font_title.borders.THIN
+
+    ws.write_merge(0, 0, 0, 4, "Отчёт по продажам билетов", font_title)
+
+    font_zag = xlwt.XFStyle()
+    font_zag.font.name = "Times New Roman"
+    font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
+    font_zag.font.bold = False
+    font_zag.borders.top = font_zag.borders.THIN
+    font_zag.borders.bottom = font_zag.borders.THIN
+    font_zag.borders.left = font_zag.borders.THIN
+    font_zag.borders.right = font_zag.borders.THIN
+    font_zag.font.height = 20 * 12
 
     columns = [
         "Дата продажи",
@@ -287,16 +313,52 @@ def export_stat_bill(request):
         "Дата прохода по билету"
     ]
 
+    len_date_bill = len(columns[0])
+    len_id_ticket = len(columns[1])
+    len_tariff = len(columns[2])
+    len_ticket_validity_date = len(columns[3])
+    len_date_of_ticket_passage = len(columns[4])
+
     for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style)
+        ws.write(row_num, col_num, columns[col_num], font_zag)
+
+    font_style = xlwt.XFStyle()
+    font_style.font.name = "Times New Roman"
+    font_style.font.bold = False
+    font_style.borders.top = font_zag.borders.THIN
+    font_style.borders.bottom = font_zag.borders.THIN
+    font_style.borders.left = font_zag.borders.THIN
+    font_style.borders.right = font_zag.borders.THIN
+    font_style.font.height = 20 * 12
 
     report_xls = ReportXLS()
     kontur = report_xls.get_stat_bill(Kontur.objects.all().order_by("date_bill"))
     rows = kontur
 
+    for i in kontur:
+        if len_date_bill < len(i[0]):
+            len_date_bill = len(i[0])
+        if len_id_ticket < len(i[1]):
+            len_id_ticket = len(i[1])
+        if len_tariff < len(i[2]):
+            len_tariff = len(i[2])
+        if len_ticket_validity_date < len(i[3]):
+            len_ticket_validity_date = len(i[3])
+        if len_date_of_ticket_passage < len(i[4]):
+            len_date_of_ticket_passage = len(i[4])
+
+    width_col = [
+        len_date_bill,
+        len_id_ticket,
+        len_tariff,
+        len_ticket_validity_date,
+        len_date_of_ticket_passage
+    ]
+
     for row in rows:
         row_num += 1
         for col_num in range(len(row)):
+            ws.col(col_num).width = 256 * (int(width_col[col_num]) + 1)
             ws.write(row_num, col_num, str(row[col_num]), font_style)
 
     wb.save(response)
@@ -311,9 +373,35 @@ def export_passage(request):
 
     wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet("report")
-    row_num = 0
-    font_style = xlwt.XFStyle()
-    font_style.font.bold = True
+    row_num = 1
+    font_title = xlwt.XFStyle()
+    font_title.font.name = "Times New Roman"
+    font_title.font.height = 20 * 14
+    font_title.font.bold = True
+    font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_title.alignment.horz = font_title.alignment.HORZ_CENTER
+    col_pat = xlwt.Pattern()
+    col_pat.pattern = col_pat.SOLID_PATTERN
+    col_pat.pattern_fore_colour = 22
+    col_pat.pattern_back_colour = 4
+    font_title.pattern = col_pat
+    font_title.borders.top = font_title.borders.THIN
+    font_title.borders.bottom = font_title.borders.THIN
+    font_title.borders.left = font_title.borders.THIN
+    font_title.borders.right = font_title.borders.THIN
+
+    ws.write_merge(0, 0, 0, 4, "Отчёт по проходам через турникеты", font_title)
+
+    font_zag = xlwt.XFStyle()
+    font_zag.font.name = "Times New Roman"
+    font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
+    font_zag.font.bold = False
+    font_zag.borders.top = font_zag.borders.THIN
+    font_zag.borders.bottom = font_zag.borders.THIN
+    font_zag.borders.left = font_zag.borders.THIN
+    font_zag.borders.right = font_zag.borders.THIN
+    font_zag.font.height = 20 * 12
 
     columns = [
         "Дата прохода",
@@ -323,16 +411,53 @@ def export_passage(request):
         "Индификатор"
     ]
 
+    len_resolution_timestamp = len(columns[0])
+    len_id_point = len(columns[1])
+    len_id_ter_from = len(columns[2])
+    len_id_ter_to = len(columns[3])
+    len_identifier_value = len(columns[4])
+
     for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style)
+        ws.write(row_num, col_num, columns[col_num], font_zag)
+
+
+    font_style = xlwt.XFStyle()
+    font_style.font.name = "Times New Roman"
+    font_style.font.bold = False
+    font_style.borders.top = font_zag.borders.THIN
+    font_style.borders.bottom = font_zag.borders.THIN
+    font_style.borders.left = font_zag.borders.THIN
+    font_style.borders.right = font_zag.borders.THIN
+    font_style.font.height = 20 * 12
 
     report_xls = ReportXLS()
     passages_turnstiles = report_xls.get_passage(PassagesTurnstile.objects.all().order_by('resolution_timestamp'))
     rows = passages_turnstiles
 
+    for i in passages_turnstiles:
+        if len_resolution_timestamp < len(i[0]):
+            len_resolution_timestamp = len(i[0])
+        if len_id_point < len(i[1]):
+            len_id_point = len(i[1])
+        if len_id_ter_from < len(i[2]):
+            len_id_ter_from = len(i[2])
+        if len_id_ter_to < len(i[3]):
+            len_id_ter_to = len(i[3])
+        if len_identifier_value < len(i[4]):
+            len_identifier_value = len(i[4])
+
+    width_col = [
+        len_resolution_timestamp,
+        len_id_point,
+        len_id_ter_to,
+        len_id_ter_from,
+        len_identifier_value
+    ]
+
     for row in rows:
         row_num += 1
         for col_num in range(len(row)):
+            ws.col(col_num).width = 256 * (int(width_col[col_num]) + 1)
             ws.write(row_num, col_num, str(row[col_num]), font_style)
 
     wb.save(response)
