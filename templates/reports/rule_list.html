@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отчёт по продаже билетов</title>
+    <title>Правила пользования</title>
     <link rel="stylesheet" href="{% static 'css/body.css' %}" type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -57,41 +57,77 @@
     </nav>
     <br>
     <div class="container back">
-    <br>
-    <form class="row g-3" method="get" action="">
-        {% csrf_token %}
-        <h3>Укажите временной период</h3>
-        <div class="col-md-3">
-            <label for="{{ ticket_form.start_date.id_for_label }}">Начало периода</label>
-            {{ ticket_form.start_date }}
-        </div>
-        <div class="col-md-3">
-            <label for="{{ ticket_form.end_date.id_for_label }}">Конец периода</label>
-            {{ ticket_form.end_date }}
-        </div>
-        <div class="col-12">
-            <input type="submit" name="sun" class="btn btn-outline-primary contact-form__button"
-                   value="Подготовить отчёт">
-        </div>
-    </form>
-    <br>
-    <hr>
-    <br>
-    {% if fo != "yes" %}
-        <div id="cont" style="display: none">
-    {% else %}
-        <div id="cont">
-            {% block ticket %}
-            {% endblock %}
-        </div>
-    {% endif %}
-</div>
-{% else %}
-    <div class="container-fluid">
         <br>
-        <p>Войдите в систему</p>
-        <a class="btn btn-outline-primary" href="{% url 'login' %}" role="button">Войти</a>
+        <h1>Правила пользования</h1>
+        <br>
+        <hr>
+        <div class="table-responsive" style="width: 50%; margin-left: 25%">
+            <form method="POST">
+                <a class="btn btn-primary" href="{% url 'export-stat-bill' %}" role="button">Скачать отчёт</a>
+                <p></p>
+            </form>
+            <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+                <thead class="align-middle table-primary">
+                <tr>
+                    <th scope="col">Правила пользования</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                {% for t in page_m %}
+                    <tr>
+                        <td scope="row">{{ t.rule_use }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if page_m.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link first_page" href="{% spurl query=request.GET set_query='page=1' %}">
+                                &laquo;Первая
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for pa in page_m.paginator.page_range %}
+                        {% if pa == page_m.number %}
+                            <li class="page-item">
+                                <a class="page-link active now_page"
+                                   href="{% spurl query=request.GET set_query='page={{ pa }}' %}">
+                                    {{ pa }}
+                                </a>
+                            </li>
+                        {% elif pa >= page_m.number|add:-2 and pa <= page_m.number|add:2 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% spurl query=request.GET set_query='page={{ pa }}' %}">
+                                    {{ pa }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_m.has_next %}
+                        <li class="page-item">
+                            <a class="page-link last_page"
+                               href="{% spurl query=request.GET set_query='page={{ page_m.paginator.num_pages }}' %}">
+                                Последняя&raquo;
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
     </div>
+{% else %}
+    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <div class="navbar-collapse" id="navbarScroll">
+                <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}" role="button">Войти</a>
+            </div>
+        </div>
+    </nav>
+    <br>
 {% endif %}
 <br>
 {% block content %}

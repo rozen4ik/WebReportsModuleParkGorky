@@ -1,4 +1,5 @@
 import datetime
+import os
 import fdb
 import pymysql
 import xlwt
@@ -10,7 +11,7 @@ from sshtunnel import SSHTunnelForwarder
 from bs4 import BeautifulSoup
 from configuration.models import Conf
 from reports.forms import TicketSales
-from reports.models import Kontur, Baloon, PassagesTurnstile
+from reports.models import Kontur, Baloon, PassagesTurnstile, RuleList
 from reports.services.report_xls import ReportXLS
 
 
@@ -68,7 +69,9 @@ def ticket_sales(request):
 
                 trs = soup.find_all('table')[1].find_all('tr')
 
-                pars_table(trs, 'td')
+                pars_ticket(trs, 'td')
+
+                os.remove("result_scan_req.html")
 
                 with SSHTunnelForwarder(
                         (f'{config.ip_ssh}', 22),
@@ -218,6 +221,54 @@ def passages_through_turnstiles(request):
     return render(request, "reports/result_passage.html", data)
 
 
+def rule_list(request):
+    if request.user.is_authenticated:
+        user = User.objects.all().select_related('profile')
+        access = get_access(request)
+        config = Conf.objects.get(id=1)
+        page_number = request.GET.get("page")
+        page_m = ""
+        con = settings_firebird(config)
+        cur = con.cursor()
+        tables = cur.execute(
+            "select "
+            "* "
+            "from "
+            "HTML$RULE_LIST "
+        ).fetchall()
+
+        con.commit()
+        con.close()
+
+        st = ""
+        for i in tables:
+            st += f"{i[0]}"
+
+        st = st.replace("charset=windows-1251", "charset=utf-8")
+        with open('result_rule_list.html', 'w') as output_file:
+            output_file.write(st)
+
+        with open("result_rule_list.html") as fp:
+            soup = BeautifulSoup(fp, "lxml")
+
+        trs = soup.find_all('table')[1].find_all('tr')
+        pars_rule_list(trs)
+        os.remove("result_rule_list.html")
+
+        rule_use = RuleList.objects.all()
+
+        page_model = Paginator(rule_use, 20)
+        page_m = page_model.get_page(page_number)
+
+        data = {
+            "page_m": page_m,
+            "access": access
+        }
+    else:
+        data = {}
+    return render(request, "reports/rule_list.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')
@@ -239,7 +290,7 @@ def settings_firebird(config):
     return con
 
 
-def pars_table(trs, tag):
+def pars_ticket(trs, tag):
     count = 0
     kontur = Kontur.objects.all().delete()
     for tr in trs:
@@ -264,8 +315,15 @@ def pars_table(trs, tag):
     kontur = kontur[0].delete()
 
 
-def is_ajax(request):
-    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+def pars_rule_list(trs):
+    soup = BeautifulSoup(str(trs))
+    r_list = soup.get_text()
+    rule_use = RuleList.objects.all().delete()
+    r_list = r_list.replace("[", "").replace("]", "").split(", ")
+    for i in r_list:
+        rule_use = RuleList()
+        rule_use.rule_use = i
+        rule_use.save()
 
 
 def export_stat_bill(request):
