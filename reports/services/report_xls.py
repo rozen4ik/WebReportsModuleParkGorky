@@ -16,3 +16,8 @@ class ReportXLS:
             'id_ter_to',
             'identifier_value',
         )
+
+    def get_rule_list(self, rule_list):
+        return rule_list.values_list(
+            'rule_use',
+        )

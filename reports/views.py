@@ -478,7 +478,6 @@ def export_passage(request):
     for col_num in range(len(columns)):
         ws.write(row_num, col_num, columns[col_num], font_zag)
 
-
     font_style = xlwt.XFStyle()
     font_style.font.name = "Times New Roman"
     font_style.font.bold = False
@@ -516,6 +515,79 @@ def export_passage(request):
         row_num += 1
         for col_num in range(len(row)):
             ws.col(col_num).width = 256 * (int(width_col[col_num]) + 1)
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+    wb.save(response)
+
+    return response
+
+
+def export_rule_list(request):
+    response = HttpResponse(content_type="applications/ms-excel")
+    date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    response["Content-Disposition"] = "attachment; filename=RuleList " + str(date) + ".xls"
+
+    wb = xlwt.Workbook(encoding="utf-8")
+    ws = wb.add_sheet("report")
+    row_num = 1
+    font_title = xlwt.XFStyle()
+    font_title.font.name = "Times New Roman"
+    font_title.font.height = 20 * 14
+    font_title.font.bold = True
+    font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_title.alignment.horz = font_title.alignment.HORZ_CENTER
+    col_pat = xlwt.Pattern()
+    col_pat.pattern = col_pat.SOLID_PATTERN
+    col_pat.pattern_fore_colour = 22
+    col_pat.pattern_back_colour = 4
+    font_title.pattern = col_pat
+    font_title.borders.top = font_title.borders.THIN
+    font_title.borders.bottom = font_title.borders.THIN
+    font_title.borders.left = font_title.borders.THIN
+    font_title.borders.right = font_title.borders.THIN
+
+    font_zag = xlwt.XFStyle()
+    font_zag.font.name = "Times New Roman"
+    font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
+    font_zag.font.bold = False
+    font_zag.borders.top = font_zag.borders.THIN
+    font_zag.borders.bottom = font_zag.borders.THIN
+    font_zag.borders.left = font_zag.borders.THIN
+    font_zag.borders.right = font_zag.borders.THIN
+    font_zag.font.height = 20 * 12
+
+    columns = [
+        "Отчёт по правилам пользования",
+        "Правила пользования"
+    ]
+
+    len_rule_use = len(columns[0])
+
+    ws.write(0, 0, columns[0], font_title)
+    ws.write(row_num, 0, columns[1], font_zag)
+
+    font_style = xlwt.XFStyle()
+    font_style.font.name = "Times New Roman"
+    font_style.font.bold = False
+    font_style.borders.top = font_zag.borders.THIN
+    font_style.borders.bottom = font_zag.borders.THIN
+    font_style.borders.left = font_zag.borders.THIN
+    font_style.borders.right = font_zag.borders.THIN
+    font_style.font.height = 20 * 12
+
+    report_xls = ReportXLS()
+    r_list = report_xls.get_rule_list(RuleList.objects.all())
+    rows = r_list
+
+    for i in r_list:
+        if len_rule_use < len(i[0]):
+            len_rule_use = len(i[0])
+
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            ws.col(col_num).width = 256 * (len_rule_use + 7)
             ws.write(row_num, col_num, str(row[col_num]), font_style)
 
     wb.save(response)
