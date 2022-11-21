@@ -55,3 +55,14 @@ class RuleList(models.Model):
     class Meta:
         verbose_name = "правила пользования"
         verbose_name_plural = "правила пользованпя"
+
+
+class ServiceList(models.Model):
+    service = models.CharField(max_length=250, blank=True, null=True)
+
+    def __str__(self):
+        return self.service
+
+    class Meta:
+        verbose_name = "услугу"
+        verbose_name_plural = "услуги"

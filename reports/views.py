@@ -1,5 +1,7 @@
 import datetime
 import os
+import re
+
 import fdb
 import pymysql
 import xlwt
@@ -11,7 +13,7 @@ from sshtunnel import SSHTunnelForwarder
 from bs4 import BeautifulSoup
 from configuration.models import Conf
 from reports.forms import TicketSales
-from reports.models import Kontur, Baloon, PassagesTurnstile, RuleList
+from reports.models import Kontur, Baloon, PassagesTurnstile, RuleList, ServiceList
 from reports.services.report_xls import ReportXLS
 
 
@@ -269,6 +271,54 @@ def rule_list(request):
     return render(request, "reports/rule_list.html", data)
 
 
+def service_list(request):
+    if request.user.is_authenticated:
+        user = User.objects.all().select_related('profile')
+        access = get_access(request)
+        config = Conf.objects.get(id=1)
+        page_number = request.GET.get("page")
+        page_m = ""
+        con = settings_firebird(config)
+        cur = con.cursor()
+        tables = cur.execute(
+            "select "
+            "* "
+            "from "
+            "HTML$SERVICE_LIST "
+        ).fetchall()
+
+        con.commit()
+        con.close()
+
+        st = ""
+        for i in tables:
+            st += f"{i[0]}"
+
+        st = st.replace("charset=windows-1251", "charset=utf-8")
+        with open('result_service_list.html', 'w') as output_file:
+            output_file.write(st)
+
+        with open("result_service_list.html") as fp:
+            soup = BeautifulSoup(fp, "lxml")
+
+        trs = soup.find_all('table')[1].find_all('tr')
+        pars_service_list(trs)
+        # os.remove("result_service_list.html")
+
+        service_use = ServiceList.objects.all()
+
+        page_model = Paginator(service_use, 20)
+        page_m = page_model.get_page(page_number)
+
+        data = {
+            "page_m": page_m,
+            "access": access
+        }
+    else:
+        data = {}
+    return render(request, "reports/service_list.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')
@@ -324,6 +374,22 @@ def pars_rule_list(trs):
         rule_use = RuleList()
         rule_use.rule_use = i
         rule_use.save()
+
+
+def pars_service_list(trs):
+    soup = BeautifulSoup(str(trs))
+    s_list = soup.get_text()
+    service_use = ServiceList.objects.all().delete()
+    s_list = s_list.replace("[", "").replace("]", "").split(", ")
+    for i in s_list:
+        res = re.sub("[A-Za-z]+", lambda ele: " " + ele[0] + " ", i)
+        res = re.sub("[А-Яа-я]+", lambda ele: " " + ele[0] + " ", res)
+        res = re.sub(r"\B([А-Я])", r" \1", res)
+        res = res.replace("  ", " ")
+        # print(res.lstrip())
+        service_use = ServiceList()
+        service_use.service = res.lstrip()
+        service_use.save()
 
 
 def export_stat_bill(request):
@@ -588,6 +654,79 @@ def export_rule_list(request):
         row_num += 1
         for col_num in range(len(row)):
             ws.col(col_num).width = 256 * (len_rule_use + 7)
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+    wb.save(response)
+
+    return response
+
+
+def export_service_list(request):
+    response = HttpResponse(content_type="applications/ms-excel")
+    date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    response["Content-Disposition"] = "attachment; filename=ServiceList " + str(date) + ".xls"
+
+    wb = xlwt.Workbook(encoding="utf-8")
+    ws = wb.add_sheet("report")
+    row_num = 1
+    font_title = xlwt.XFStyle()
+    font_title.font.name = "Times New Roman"
+    font_title.font.height = 20 * 14
+    font_title.font.bold = True
+    font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_title.alignment.horz = font_title.alignment.HORZ_CENTER
+    col_pat = xlwt.Pattern()
+    col_pat.pattern = col_pat.SOLID_PATTERN
+    col_pat.pattern_fore_colour = 22
+    col_pat.pattern_back_colour = 4
+    font_title.pattern = col_pat
+    font_title.borders.top = font_title.borders.THIN
+    font_title.borders.bottom = font_title.borders.THIN
+    font_title.borders.left = font_title.borders.THIN
+    font_title.borders.right = font_title.borders.THIN
+
+    font_zag = xlwt.XFStyle()
+    font_zag.font.name = "Times New Roman"
+    font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
+    font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
+    font_zag.font.bold = False
+    font_zag.borders.top = font_zag.borders.THIN
+    font_zag.borders.bottom = font_zag.borders.THIN
+    font_zag.borders.left = font_zag.borders.THIN
+    font_zag.borders.right = font_zag.borders.THIN
+    font_zag.font.height = 20 * 12
+
+    columns = [
+        "Отчёт по услугам",
+        "Услуги"
+    ]
+
+    len_service_use = len(columns[0])
+
+    ws.write(0, 0, columns[0], font_title)
+    ws.write(row_num, 0, columns[1], font_zag)
+
+    font_style = xlwt.XFStyle()
+    font_style.font.name = "Times New Roman"
+    font_style.font.bold = False
+    font_style.borders.top = font_zag.borders.THIN
+    font_style.borders.bottom = font_zag.borders.THIN
+    font_style.borders.left = font_zag.borders.THIN
+    font_style.borders.right = font_zag.borders.THIN
+    font_style.font.height = 20 * 12
+
+    report_xls = ReportXLS()
+    s_list = report_xls.get_service_list(ServiceList.objects.all())
+    rows = s_list
+
+    for i in s_list:
+        if len_service_use < len(i[0]):
+            len_service_use = len(i[0])
+
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            ws.col(col_num).width = 256 * (len_service_use + 1)
             ws.write(row_num, col_num, str(row[col_num]), font_style)
 
     wb.save(response)

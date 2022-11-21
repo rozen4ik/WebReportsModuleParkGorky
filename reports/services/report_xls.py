@@ -21,3 +21,8 @@ class ReportXLS:
         return rule_list.values_list(
             'rule_use',
         )
+
+    def get_service_list(self, service_list):
+        return service_list.values_list(
+            'service',
+        )
