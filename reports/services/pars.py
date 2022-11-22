@@ -1,6 +1,6 @@
 import re
 from bs4 import BeautifulSoup
-from reports.models import Kontur, RuleList, ServiceList
+from reports.models import *
 
 
 class Pars:
@@ -51,3 +51,41 @@ class Pars:
             service_use = ServiceList()
             service_use.service = res.lstrip()
             service_use.save()
+
+    def pars_desk_shift_1(self, trs, tag):
+        report_z_desk = ReportZDesk.objects.all().delete()
+        report_z_desk = ReportZDesk()
+        report_z_desk.number = trs[0].find(tag).text.replace('\n', '')
+        report_z_desk.condition = trs[1].find(tag).text.replace('\n', '')
+        report_z_desk.desk = trs[2].find(tag).text.replace('\n', '')
+        report_z_desk.type = trs[3].find(tag).text.replace('\n', '')
+        report_z_desk.number_fr = trs[4].find(tag).text.replace('\n', '')
+        report_z_desk.open_sm = trs[5].find(tag).text.replace('\n', '')
+        report_z_desk.operator_open = trs[6].find(tag).text.replace('\n', '')
+        report_z_desk.close_sm = trs[7].find(tag).text.replace('\n', '')
+        report_z_desk.operator_close = trs[8].find(tag).text.replace('\n', '')
+        report_z_desk.save()
+
+    def pars_desk_shift_2(self, trs, tag):
+        count = 0
+        summary_report_desk = SummaryReportDesk.objects.all().delete()
+        for tr in trs:
+            cap = tr.find_all(tag)
+            summary_report_desk = SummaryReportDesk()
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                if count == 0:
+                    summary_report_desk.operation_desk = caps
+                elif count == 1:
+                    summary_report_desk.operation_reg = caps
+                elif count == 2:
+                    summary_report_desk.view_pay = caps
+                elif count == 3:
+                    summary_report_desk.count_operation = caps
+                elif count == 4:
+                    summary_report_desk.summ = caps
+                count += 1
+            summary_report_desk.save()
+            count = 0
+        summary_report_desk = SummaryReportDesk.objects.all()
+        summary_report_desk = summary_report_desk[0].delete()

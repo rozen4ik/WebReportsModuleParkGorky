@@ -51,6 +51,15 @@ def service_list(request):
     return render(request, "reports/service_list.html", data)
 
 
+def desk_shift(request):
+    if request.user.is_authenticated:
+        report = Report()
+        data = report.get_desk_shift(request)
+    else:
+        data = {}
+    return render(request, "reports/result_desk_shift.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')

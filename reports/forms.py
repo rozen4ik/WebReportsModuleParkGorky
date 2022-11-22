@@ -1,4 +1,14 @@
 from django import forms
+from reports.models import DeskItems
+
+d = DeskItems.objects.all()
+desk_l = []
+
+for i in d:
+    desk_l.append((f"{i.name}", f"{i.name}"))
+
+desk_l = tuple(desk_l)
+
 
 
 class TicketSales(forms.Form):
@@ -20,4 +30,16 @@ class TicketSales(forms.Form):
                 "type": "date"
             },
         )
+    )
+
+
+class DeskForms(forms.Form):
+    desk = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": "form-select"
+            }
+        ),
+        choices=desk_l,
     )

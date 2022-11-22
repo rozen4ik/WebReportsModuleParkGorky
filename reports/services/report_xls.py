@@ -1,7 +1,7 @@
 import datetime
 import xlwt
 from django.http import HttpResponse
-from reports.models import Kontur, PassagesTurnstile, RuleList, ServiceList
+from reports.models import *
 
 
 class ReportXLS:

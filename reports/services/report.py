@@ -6,8 +6,8 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from sshtunnel import SSHTunnelForwarder
 from configuration.models import Conf
-from reports.forms import TicketSales
-from reports.models import Baloon, Kontur, PassagesTurnstile, RuleList, ServiceList
+from reports.forms import *
+from reports.models import *
 from reports.services.pars import Pars
 
 
@@ -315,6 +315,81 @@ class Report:
         data = {
             "page_m": page_m,
             "access": access
+        }
+
+        return data
+
+    def get_desk_shift(self, request):
+        user = User.objects.all().select_related('profile')
+        access = self.get_access(request)
+        config = Conf.objects.get(id=1)
+        desk = DeskItems.objects.all().delete()
+        report_z_desk = ReportZDesk.objects.all().delete()
+        summary_report_desk = SummaryReportDesk.objects.all().delete()
+        fo = ""
+        pars = Pars()
+        con = self.settings_firebird(config)
+        cur = con.cursor()
+        desk_items = cur.execute(
+            "select "
+            "ID, NAME "
+            "from "
+            "DESK$ITEMS "
+        ).fetchall()
+
+        con.commit()
+        con.close()
+
+        for i in desk_items:
+            desk = DeskItems()
+            desk.id_desk = i[0]
+            desk.name = i[1]
+            desk.save()
+
+        desk_form = DeskForms(request.GET)
+
+        if desk_form.is_valid():
+            filter_desk = desk_form.cleaned_data
+
+            if filter_desk != {'desk': ''}:
+                fo = "yes"
+                desk = DeskItems.objects.get(name=filter_desk["desk"])
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "* "
+                    "from "
+                    f"HTML$DESK_SHIFT('{desk.id_desk}') "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                st = ""
+                for i in tables:
+                    st += f"{i[0]}"
+
+                with open('result_service_list.html', 'w') as output_file:
+                    output_file.write(st)
+
+                with open("result_service_list.html") as fp:
+                    soup = BeautifulSoup(fp, "lxml")
+
+                trs = soup.find_all('table')[1].find_all('tr')
+                pars.pars_desk_shift_1(trs, 'td')
+                trs = soup.find_all('table')[2].find_all('tr')
+                pars.pars_desk_shift_2(trs, 'td')
+
+                report_z_desk = ReportZDesk.objects.all()
+                summary_report_desk = SummaryReportDesk.objects.all()
+
+        data = {
+            "access": access,
+            "desk_form": desk_form,
+            "fo": fo,
+            "report_z_desk": report_z_desk,
+            "summary_report_desk": summary_report_desk
         }
 
         return data

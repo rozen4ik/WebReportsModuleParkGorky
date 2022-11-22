@@ -1,0 +1,67 @@
+{% extends 'reports/forms/desk_shift.html' %}
+{% load static %}
+{% load spurl %}
+{% block desk %}
+    <div class="table-responsive">
+        <form method="POST">
+            <a class="btn btn-primary" href="{% url 'export-passage' %}" role="button">Скачать отчёт</a>
+            <p></p>
+        </form>
+        <h2 align="center">Z-Отчёт по кассе</h2>
+        <br>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Номер смены</th>
+                <th scope="col">Состояние</th>
+                <th scope="col">Касса</th>
+                <th scope="col">Тип смены</th>
+                <th scope="col">Номер ФР</th>
+                <th scope="col">Открытие смены</th>
+                <th scope="col">Оператор, открывший смену</th>
+                <th scope="col">Закрытие смены</th>
+                <th scope="col">Оператор, закрывший смену</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in report_z_desk %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.number }}</td>
+                    <td>{{ t.condition }}</td>
+                    <td>{{ t.desk }}</td>
+                    <td>{{ t.type }}</td>
+                    <td>{{ t.number_fr }}</td>
+                    <td>{{ t.open_sm }}</td>
+                    <td>{{ t.operator_open }}</td>
+                    <td>{{ t.close_sm }}</td>
+                    <td>{{ t.operator_close }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <b><p align="center">Сводный отчёт по кассе</p></b>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Операция кассы</th>
+                <th scope="col">Операция регистратора</th>
+                <th scope="col">Вид оплаты</th>
+                <th scope="col">Кол-во операций</th>
+                <th scope="col">Сумма</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in summary_report_desk %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.operation_desk }}</td>
+                    <td>{{ t.operation_reg }}</td>
+                    <td>{{ t.view_pay }}</td>
+                    <td>{{ t.count_operation }}</td>
+                    <td>{{ t.summ }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
