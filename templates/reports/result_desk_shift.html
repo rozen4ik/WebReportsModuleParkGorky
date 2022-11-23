@@ -63,5 +63,73 @@
             {% endfor %}
             </tbody>
         </table>
+        <br>
+        <b><p align="center">Ошибочные операции ФР</p></b>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Счет</th>
+                <th scope="col">Дата</th>
+                <th scope="col">Сумма</th>
+                <th scope="col">Номер док-та ФР</th>
+                <th scope="col">Состояние</th>
+                <th scope="col">Операция кассы</th>
+                <th scope="col">Операция регистратора</th>
+                <th scope="col">Тип оплаты</th>
+                <th scope="col">Примечание</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in erroneous_operations %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.bill }}</td>
+                    <td>{{ t.date_e }}</td>
+                    <td>{{ t.summ }}</td>
+                    <td>{{ t.number_doc }}</td>
+                    <td>{{ t.condition }}</td>
+                    <td>{{ t.operation_desk }}</td>
+                    <td>{{ t.operation_reg }}</td>
+                    <td>{{ t.type_pay }}</td>
+                    <td>{{ t.comment }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Сумма наличных</th>
+                <th scope="col">Сумма исправительных операций</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in summ_money %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.cash_amount }}</td>
+                    <td>{{ t.the_amount_of_corrective_operations }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+        <b><p align="center">Оплаты (баланс)</p></b>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Вид оплаты</th>
+                <th scope="col">Сумма</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in view_pay %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.view }}</td>
+                    <td>{{ t.pay }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <hr>
     </div>
 {% endblock %}

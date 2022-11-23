@@ -326,6 +326,9 @@ class Report:
         desk = DeskItems.objects.all().delete()
         report_z_desk = ReportZDesk.objects.all().delete()
         summary_report_desk = SummaryReportDesk.objects.all().delete()
+        erroneous_operations = ErroneousOperations.objects.all().delete()
+        summ_money = SummMoney.objects.all().delete()
+        view_pay = ViewPay.objects.all().delete()
         fo = ""
         pars = Pars()
         con = self.settings_firebird(config)
@@ -378,18 +381,44 @@ class Report:
 
                 trs = soup.find_all('table')[1].find_all('tr')
                 pars.pars_desk_shift_1(trs, 'td')
+                report_z_desk = ReportZDesk.objects.all()
+
                 trs = soup.find_all('table')[2].find_all('tr')
                 pars.pars_desk_shift_2(trs, 'td')
-
-                report_z_desk = ReportZDesk.objects.all()
                 summary_report_desk = SummaryReportDesk.objects.all()
+
+                er = soup.find_all('p')
+
+                if len(er) > 0:
+                    trs = soup.find_all('table')[3].find_all('tr')
+                    pars.pars_desk_shift_3(trs, 'td')
+                    erroneous_operations = ErroneousOperations.objects.all()
+
+                    trs = soup.find_all('table')[4].find_all('tr')
+                    pars.pars_desk_shift_4(trs, 'td')
+                    summ_money = SummMoney.objects.all()
+
+                    trs = soup.find_all('table')[5].find_all('tr')
+                    pars.pars_desk_shift_5(trs, 'td')
+                    view_pay = ViewPay.objects.all()
+                else:
+                    trs = soup.find_all('table')[3].find_all('tr')
+                    pars.pars_desk_shift_4(trs, 'td')
+                    summ_money = SummMoney.objects.all()
+
+                    trs = soup.find_all('table')[4].find_all('tr')
+                    pars.pars_desk_shift_5(trs, 'td')
+                    view_pay = ViewPay.objects.all()
 
         data = {
             "access": access,
             "desk_form": desk_form,
             "fo": fo,
             "report_z_desk": report_z_desk,
-            "summary_report_desk": summary_report_desk
+            "summary_report_desk": summary_report_desk,
+            "erroneous_operations": erroneous_operations,
+            "summ_money": summ_money,
+            "view_pay": view_pay
         }
 
         return data

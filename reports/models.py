@@ -99,3 +99,25 @@ class SummaryReportDesk(models.Model):
     view_pay = models.CharField(max_length=250, blank=True, null=True)
     count_operation = models.CharField(max_length=250, blank=True, null=True)
     summ = models.CharField(max_length=250, blank=True, null=True)
+
+
+class ErroneousOperations(models.Model):
+    bill = models.CharField(max_length=250, blank=True, null=True)
+    date_e = models.CharField(max_length=250, blank=True, null=True)
+    summ = models.CharField(max_length=250, blank=True, null=True)
+    number_doc = models.CharField(max_length=250, blank=True, null=True)
+    condition = models.CharField(max_length=250, blank=True, null=True)
+    operation_desk = models.CharField(max_length=250, blank=True, null=True)
+    operation_reg = models.CharField(max_length=250, blank=True, null=True)
+    type_pay = models.CharField(max_length=250, blank=True, null=True)
+    comment = models.CharField(max_length=250, blank=True, null=True)
+
+
+class SummMoney(models.Model):
+    cash_amount = models.CharField(max_length=250, blank=True, null=True)
+    the_amount_of_corrective_operations = models.CharField(max_length=250, blank=True, null=True)
+
+
+class ViewPay(models.Model):
+    view = models.CharField(max_length=250, blank=True, null=True)
+    pay = models.CharField(max_length=250, blank=True, null=True)
