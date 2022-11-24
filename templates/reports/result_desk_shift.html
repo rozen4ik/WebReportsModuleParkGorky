@@ -131,5 +131,40 @@
             </tbody>
         </table>
         <hr>
+        <b><p align="center">Расшифровка кассовых секций и налоговых групп</p></b>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Налоговая группа</th>
+                <th scope="col">Кассовая секция</th>
+                <th scope="col">Система налогообложения</th>
+                <th scope="col">Количество операций</th>
+                <th scope="col">Сумма</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in decoding_of_desk_sections_and_tax_groups %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.tax_group }}</td>
+                    <td>{{ t.desk_sections }}</td>
+                    <td>{{ t.taxation_system }}</td>
+                    <td>{{ t.count_operation }}</td>
+                    <td>{{ t.summ }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+        <b><p align="center">Дополнительная информация о кассовом аппарате</p></b>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <tbody>
+            {% for t in additional_information_about_the_desk_register %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.date_a }}</td>
+                    <td>{{ t.comment }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

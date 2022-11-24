@@ -146,3 +146,45 @@ class Pars:
             count = 0
         view_pay = ViewPay.objects.all()
         view_pay = view_pay[0].delete()
+
+    def pars_desk_shift_6(self, trs, tag):
+        count = 0
+        decoding_of_desk_sections_and_tax_groups = DecodingOfDeskSectionsAndTaxGroups.objects.all().delete()
+        for tr in trs:
+            cap = tr.find_all(tag)
+            decoding_of_desk_sections_and_tax_groups = DecodingOfDeskSectionsAndTaxGroups()
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                if count == 0:
+                    decoding_of_desk_sections_and_tax_groups.tax_group = caps
+                elif count == 1:
+                    decoding_of_desk_sections_and_tax_groups.desk_sections = caps
+                elif count == 2:
+                    decoding_of_desk_sections_and_tax_groups.taxation_system = caps
+                elif count == 3:
+                    decoding_of_desk_sections_and_tax_groups.count_operation = caps
+                elif count == 4:
+                    decoding_of_desk_sections_and_tax_groups.summ = caps
+                count += 1
+            decoding_of_desk_sections_and_tax_groups.save()
+            count = 0
+        decoding_of_desk_sections_and_tax_groups = DecodingOfDeskSectionsAndTaxGroups.objects.all()
+        decoding_of_desk_sections_and_tax_groups = decoding_of_desk_sections_and_tax_groups[0].delete()
+
+    def pars_desk_shift_7(self, trs, tag):
+        count = 0
+        additional_information_about_the_desk_register = AdditionalInformationAboutTheDeskRegister.objects.all().delete()
+        for tr in trs:
+            cap = tr.find_all(tag)
+            additional_information_about_the_desk_register = AdditionalInformationAboutTheDeskRegister()
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                if count == 0:
+                    additional_information_about_the_desk_register.date_a = caps
+                elif count == 1:
+                    additional_information_about_the_desk_register.comment = caps
+                count += 1
+            additional_information_about_the_desk_register.save()
+            count = 0
+        # additional_information_about_the_desk_register = AdditionalInformationAboutTheDeskRegister.objects.all()
+        # additional_information_about_the_desk_register = additional_information_about_the_desk_register[0].delete()

@@ -329,6 +329,9 @@ class Report:
         erroneous_operations = ErroneousOperations.objects.all().delete()
         summ_money = SummMoney.objects.all().delete()
         view_pay = ViewPay.objects.all().delete()
+        decoding_of_desk_sections_and_tax_groups = DecodingOfDeskSectionsAndTaxGroups.objects.all().delete()
+        additional_information_about_the_desk_register = AdditionalInformationAboutTheDeskRegister\
+            .objects.all().delete()
         fo = ""
         pars = Pars()
         con = self.settings_firebird(config)
@@ -373,10 +376,10 @@ class Report:
                 for i in tables:
                     st += f"{i[0]}"
 
-                with open('result_service_list.html', 'w') as output_file:
+                with open('result_desk_shift.html', 'w') as output_file:
                     output_file.write(st)
 
-                with open("result_service_list.html") as fp:
+                with open("result_desk_shift.html") as fp:
                     soup = BeautifulSoup(fp, "lxml")
 
                 trs = soup.find_all('table')[1].find_all('tr')
@@ -401,6 +404,15 @@ class Report:
                     trs = soup.find_all('table')[5].find_all('tr')
                     pars.pars_desk_shift_5(trs, 'td')
                     view_pay = ViewPay.objects.all()
+
+                    trs = soup.find_all('table')[6].find_all('tr')
+                    pars.pars_desk_shift_6(trs, 'td')
+                    decoding_of_desk_sections_and_tax_groups = DecodingOfDeskSectionsAndTaxGroups.objects.all()
+
+                    trs = soup.find_all('table')[7].find_all('tr')
+                    pars.pars_desk_shift_7(trs, 'td')
+                    additional_information_about_the_desk_register = AdditionalInformationAboutTheDeskRegister\
+                        .objects.all()
                 else:
                     trs = soup.find_all('table')[3].find_all('tr')
                     pars.pars_desk_shift_4(trs, 'td')
@@ -410,6 +422,17 @@ class Report:
                     pars.pars_desk_shift_5(trs, 'td')
                     view_pay = ViewPay.objects.all()
 
+                    trs = soup.find_all('table')[5].find_all('tr')
+                    pars.pars_desk_shift_6(trs, 'td')
+                    decoding_of_desk_sections_and_tax_groups = DecodingOfDeskSectionsAndTaxGroups.objects.all()
+
+                    trs = soup.find_all('table')[6].find_all('tr')
+                    pars.pars_desk_shift_7(trs, 'td')
+                    additional_information_about_the_desk_register = AdditionalInformationAboutTheDeskRegister \
+                        .objects.all()
+
+                os.remove("result_desk_shift.html")
+
         data = {
             "access": access,
             "desk_form": desk_form,
@@ -418,7 +441,9 @@ class Report:
             "summary_report_desk": summary_report_desk,
             "erroneous_operations": erroneous_operations,
             "summ_money": summ_money,
-            "view_pay": view_pay
+            "view_pay": view_pay,
+            "decoding_of_desk_sections_and_tax_groups": decoding_of_desk_sections_and_tax_groups,
+            "additional_information_about_the_desk_register": additional_information_about_the_desk_register
         }
 
         return data
