@@ -389,6 +389,46 @@ class ReportXLS:
             'summ'
         )
 
+    def __get_erroneous_operations(self, erroneous_operations):
+        return erroneous_operations.values_list(
+            'bill',
+            'date_e',
+            'summ',
+            'number_doc',
+            'condition',
+            'operation_desk',
+            'operation_reg',
+            'type_pay',
+            'comment'
+        )
+
+    def __get_summ_money(self, summ_money):
+        return summ_money.values_list(
+            'cash_amount',
+            'the_amount_of_corrective_operations'
+        )
+
+    def __get_view_pay(self, view_pay):
+        return view_pay.values_list(
+            'view',
+            'pay'
+        )
+
+    def __get_decoding_of_desk_sections_and_tax_groups(self, decoding_of_desk_sections_and_tax_groups):
+        return decoding_of_desk_sections_and_tax_groups.values_list(
+            'tax_group',
+            'desk_sections',
+            'taxation_system',
+            'count_operation',
+            'summ'
+        )
+
+    def __get_additional_information_about_the_desk_register(self, additional_information_about_the_desk_register):
+        return additional_information_about_the_desk_register.values_list(
+            'date_a',
+            'comment'
+        )
+
     def get_export_desk_shift(self, request):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
@@ -556,6 +596,121 @@ class ReportXLS:
                 i = col_num + 2
                 ws.col(i).width = 256 * (int(width_col_2[col_num]) + 18)
                 ws.write(row_num, i, str(row[col_num]), font_style)
+
+        row_num += 1
+        ws.write_merge(row_num, row_num, 0, 8, "Ошибочные операции ФР", font_title)
+
+        columns_3 = [
+            "Счет",
+            "Дата",
+            "Сумма",
+            "Номер док-та ФР",
+            "Состояние",
+            "Операция кассы",
+            "Операция регистратора",
+            "Тип оплаты",
+            "Примечание"
+        ]
+
+        row_num += 1
+        for col_num in range(len(columns_3)):
+            ws.write(row_num, col_num, columns_3[col_num], font_zag)
+
+        erroneous_operations = self.__get_erroneous_operations(ErroneousOperations.objects.all())
+        rows = erroneous_operations
+
+        for row in rows:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+        row_num += 1
+        ws.write_merge(row_num, row_num, 0, 8, "", font_title)
+
+        columns_4 = [
+            "Сумма наличных",
+            "Сумма исправительных операций"
+        ]
+
+        row_num += 1
+        i = 0
+        for col_num in range(len(columns_4)):
+            i = col_num + 2
+            ws.write(row_num, i, columns_4[col_num], font_zag)
+
+        summ_money = self.__get_summ_money(SummMoney.objects.all())
+        rows = summ_money
+
+        for row in rows:
+            row_num += 1
+            i = 0
+            for col_num in range(len(row)):
+                i = col_num + 2
+                ws.write(row_num, i, str(row[col_num]), font_style)
+
+        row_num += 1
+        ws.write_merge(row_num, row_num, 0, 8, "Оплаты (баланс)", font_title)
+
+        columns_5 = [
+            "Вид оплаты",
+            "Сумма"
+        ]
+
+        row_num += 1
+        i = 0
+        for col_num in range(len(columns_5)):
+            i = col_num + 2
+            ws.write(row_num, i, columns_5[col_num], font_zag)
+
+        view_pay = self.__get_view_pay(ViewPay.objects.all())
+        rows = view_pay
+
+        for row in rows:
+            row_num += 1
+            i = 0
+            for col_num in range(len(row)):
+                i = col_num + 2
+                ws.write(row_num, i, str(row[col_num]), font_style)
+
+        row_num += 1
+        ws.write_merge(row_num, row_num, 0, 8, "Расшифровка кассовых секций и налоговых групп", font_title)
+
+        columns_6 = [
+            "Налоговая группа",
+            "Кассовая секция",
+            "Система налогообложения",
+            "Кол-во операций",
+            "Сумма"
+        ]
+
+        row_num += 1
+        i = 0
+        for col_num in range(len(columns_6)):
+            i = col_num + 2
+            ws.write(row_num, i, columns_6[col_num], font_zag)
+
+        get_decoding_of_desk_sections_and_tax_groups = self.__get_decoding_of_desk_sections_and_tax_groups(
+            DecodingOfDeskSectionsAndTaxGroups.objects.all())
+        rows = get_decoding_of_desk_sections_and_tax_groups
+
+        for row in rows:
+            row_num += 1
+            i = 0
+            for col_num in range(len(row)):
+                i = col_num + 2
+                ws.write(row_num, i, str(row[col_num]), font_style)
+
+        row_num += 1
+        ws.write_merge(row_num, row_num, 0, 8, "Дополнительная информация о кассовом аппарате", font_title)
+
+        additional_information_about_the_desk_register = self.__get_additional_information_about_the_desk_register(
+            AdditionalInformationAboutTheDeskRegister.objects.all())
+        rows = additional_information_about_the_desk_register
+
+        for row in rows:
+            row_num += 1
+            ws.write_merge(row_num, row_num, 0, 1, str(row[0]), font_style)
+            ws.write_merge(row_num, row_num, 2, 8, str(row[1]), font_style)
 
         wb.save(response)
 
