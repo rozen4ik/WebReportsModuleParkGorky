@@ -366,3 +366,197 @@ class ReportXLS:
         wb.save(response)
 
         return response
+
+    def __get_report_z_desk(self, report_z_desk):
+        return report_z_desk.values_list(
+            'number',
+            'condition',
+            'desk',
+            'type',
+            'number_fr',
+            'open_sm',
+            'operator_open',
+            'close_sm',
+            'operator_close'
+        )
+
+    def __get_summary_report_desk(self, summary_report_desk):
+        return summary_report_desk.values_list(
+            'operation_desk',
+            'operation_reg',
+            'view_pay',
+            'count_operation',
+            'summ'
+        )
+
+    def get_export_desk_shift(self, request):
+        response = HttpResponse(content_type="applications/ms-excel")
+        date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+        response["Content-Disposition"] = "attachment; filename=DeskShift " + str(date) + ".xls"
+
+        wb = xlwt.Workbook(encoding="utf-8")
+        ws = wb.add_sheet("report")
+        row_num = 1
+        font_title = xlwt.XFStyle()
+        font_title.font.name = "Times New Roman"
+        font_title.font.height = 20 * 14
+        font_title.font.bold = True
+        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
+        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
+        col_pat = xlwt.Pattern()
+        col_pat.pattern = col_pat.SOLID_PATTERN
+        col_pat.pattern_fore_colour = 22
+        col_pat.pattern_back_colour = 4
+        font_title.pattern = col_pat
+        font_title.borders.top = font_title.borders.THIN
+        font_title.borders.bottom = font_title.borders.THIN
+        font_title.borders.left = font_title.borders.THIN
+        font_title.borders.right = font_title.borders.THIN
+
+        ws.write_merge(0, 0, 0, 8, "Z-Отчёт по кассе", font_title)
+
+        font_zag = xlwt.XFStyle()
+        font_zag.font.name = "Times New Roman"
+        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
+        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
+        font_zag.font.bold = False
+        font_zag.borders.top = font_zag.borders.THIN
+        font_zag.borders.bottom = font_zag.borders.THIN
+        font_zag.borders.left = font_zag.borders.THIN
+        font_zag.borders.right = font_zag.borders.THIN
+        font_zag.font.height = 20 * 12
+
+        columns = [
+            "Номер смены",
+            "Состояние",
+            "Касса",
+            "Тип смены",
+            "Номер ФР",
+            "Открытие смены",
+            "Оператор, открывший смену",
+            "Закрытие смены",
+            "Оператор, закрывший смену"
+        ]
+
+        len_number = len(columns[0])
+        len_condition = len(columns[1])
+        len_desk = len(columns[2])
+        len_type = len(columns[3])
+        len_number_fr = len(columns[4])
+        len_open_sm = len(columns[5])
+        len_operator_open = len(columns[6])
+        len_close_sm = len(columns[7])
+        len_operator_close = len(columns[8])
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_zag)
+
+        font_style = xlwt.XFStyle()
+        font_style.font.name = "Times New Roman"
+        font_style.font.bold = False
+        font_style.borders.top = font_zag.borders.THIN
+        font_style.borders.bottom = font_zag.borders.THIN
+        font_style.borders.left = font_zag.borders.THIN
+        font_style.borders.right = font_zag.borders.THIN
+        font_style.font.height = 20 * 12
+
+        report_z_desk = self.__get_report_z_desk(ReportZDesk.objects.all())
+        rows = report_z_desk
+
+        for i in report_z_desk:
+            if len_number < len(i[0]):
+                len_number = len(i[0])
+            if len_condition < len(i[1]):
+                len_condition = len(i[1])
+            if len_desk < len(i[2]):
+                len_desk = len(i[2])
+            if len_type < len(i[3]):
+                len_type = len(i[3])
+            if len_number_fr < len(i[4]):
+                len_number_fr = len(i[4])
+            if len_open_sm < len(i[5]):
+                len_open_sm = len(i[5])
+            if len_operator_open < len(i[6]):
+                len_operator_open = len(i[6])
+            if len_close_sm < len(i[7]):
+                len_close_sm = len(i[7])
+            if len_operator_close < len(i[8]):
+                len_operator_close = len(i[8])
+
+        width_col = [
+            len_number,
+            len_condition,
+            len_desk,
+            len_type,
+            len_number_fr,
+            len_open_sm,
+            len_operator_open,
+            len_close_sm,
+            len_operator_close
+        ]
+
+        for row in rows:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 2)
+                ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+        font_title.font.height = 20 * 12
+
+        row_num += 1
+        ws.write_merge(row_num, row_num, 0, 8, "Сводный отчёт по кассе", font_title)
+
+        columns_2 = [
+            "Операция кассы",
+            "Операция регистратора",
+            "Вид оплаты",
+            "Кол-во операций",
+            "Сумма"
+        ]
+
+        len_operation_desk = len(columns[0])
+        len_operation_reg = len(columns[1])
+        len_view_pay = len(columns[2])
+        len_count_operation = len(columns[3])
+        len_summ = len(columns[4])
+
+        row_num += 1
+        i = 0
+        for col_num in range(len(columns_2)):
+            i = col_num + 2
+            ws.write(row_num, i, columns_2[col_num], font_zag)
+
+        summary_report_desk = self.__get_summary_report_desk(SummaryReportDesk.objects.all())
+        rows = summary_report_desk
+
+        for i in summary_report_desk:
+            if len_operation_desk < len(i[0]):
+                len_operation_desk = len(i[0])
+            if len_operation_reg < len(i[1]):
+                len_operation_reg = len(i[1])
+            if len_view_pay < len(i[2]):
+                len_view_pay = len(i[2])
+            if len_count_operation < len(i[3]):
+                len_count_operation = len(i[3])
+            if len_summ < len(i[4]):
+                len_summ = len(i[4])
+
+        width_col_2 = [
+            len_operation_desk,
+            len_operation_reg,
+            len_view_pay,
+            len_count_operation,
+            len_summ
+        ]
+
+        for row in rows:
+            row_num += 1
+            i = 0
+            for col_num in range(len(row)):
+                i = col_num + 2
+                ws.col(i).width = 256 * (int(width_col_2[col_num]) + 18)
+                ws.write(row_num, i, str(row[col_num]), font_style)
+
+        wb.save(response)
+
+        return response

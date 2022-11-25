@@ -93,3 +93,8 @@ def export_service_list(request):
     report_xls = ReportXLS()
     response = report_xls.get_export_service_list(request)
     return response
+
+def export_desk_shift(request):
+    report_xls = ReportXLS()
+    response = report_xls.get_export_desk_shift(request)
+    return response

@@ -11,5 +11,6 @@ urlpatterns = [
     path('export_stat_bill/', views.export_stat_bill, name='export-stat-bill'),
     path('export_passage/', views.export_passage, name='export-passage'),
     path('export_rule_list/', views.export_rule_list, name='export-rule-list'),
-    path('export_service_list/', views.export_service_list, name='export-service-list')
+    path('export_service_list/', views.export_service_list, name='export-service-list'),
+    path('export_desk_shift/', views.export_desk_shift, name='export-desk-shift')
 ]
