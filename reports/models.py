@@ -91,3 +91,20 @@ class DecodingOfDeskSectionsAndTaxGroups(models.Model):
 class AdditionalInformationAboutTheDeskRegister(models.Model):
     date_a = models.CharField(max_length=250, blank=True, null=True)
     comment = models.CharField(max_length=250, blank=True, null=True)
+
+
+class IdentTypes(models.Model):
+    id_ident_type = models.CharField(max_length=250, blank=True, null=True)
+    caption = models.CharField(max_length=250, blank=True, null=True)
+
+
+class SaleIdent(models.Model):
+    date_s = models.CharField(max_length=250, blank=True, null=True)
+    type_s = models.CharField(max_length=250, blank=True, null=True)
+    hardware_code = models.CharField(max_length=250, blank=True, null=True)
+    user_code = models.CharField(max_length=250, blank=True, null=True)
+    condition = models.CharField(max_length=250, blank=True, null=True)
+    desk = models.CharField(max_length=250, blank=True, null=True)
+    bill = models.CharField(max_length=250, blank=True, null=True)
+    service = models.CharField(max_length=250, blank=True, null=True)
+    price = models.CharField(max_length=250, blank=True, null=True)

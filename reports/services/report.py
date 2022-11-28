@@ -447,3 +447,83 @@ class Report:
         }
 
         return data
+
+
+    def get_sale_ident(self, request):
+        user = User.objects.all().select_related('profile')
+        access = self.get_access(request)
+        config = Conf.objects.get(id=1)
+        start_d = "01.01.01"
+        end_d = "01.01.01"
+        page_number = request.GET.get("page")
+        page_m = ""
+        ident_types = IdentTypes.objects.all().delete()
+        fo = ""
+        pars = Pars()
+        con = self.settings_firebird(config)
+        cur = con.cursor()
+        ident_types_list = cur.execute(
+            "select "
+            "ID, CAPTION "
+            "from "
+            "IDENT$TYPES "
+        ).fetchall()
+
+        con.commit()
+        con.close()
+
+        for i in ident_types_list:
+            ident_types = IdentTypes()
+            ident_types.id_ident_type = i[0]
+            ident_types.caption = i[1]
+            ident_types.save()
+
+        ident_types_form = IdentTypesForms(request.GET)
+
+        if ident_types_form.is_valid():
+            filter_ident = ident_types_form.cleaned_data
+            start_d = ident_types_form.cleaned_data["start_date"]
+            end_d = ident_types_form.cleaned_data["end_date"]
+
+            if filter_ident != {'ident_types': '', 'start_date': None, 'end_date': None}:
+                fo = "yes"
+                ident_types = IdentTypes.objects.get(caption=filter_ident["ident_types"])
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "* "
+                    "from "
+                    f"HTML$SALE_IDENT('{start_d}', '{end_d}', '{ident_types.id_ident_type}') "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                st = ""
+                for i in tables:
+                    st += f"{i[0]}"
+
+                with open('result_sale_ident.html', 'w') as output_file:
+                    output_file.write(st)
+
+                with open("result_sale_ident.html") as fp:
+                    soup = BeautifulSoup(fp, "lxml")
+
+                trs = soup.find_all('table')[1].find_all('tr')
+                pars.pars_sale_ident(trs, 'td')
+                sale_ident = SaleIdent.objects.all()
+
+                os.remove("result_sale_ident.html")
+
+                page_model = Paginator(sale_ident, 20)
+                page_m = page_model.get_page(page_number)
+
+        data = {
+            "access": access,
+            "fo": fo,
+            "ident_types_form": ident_types_form,
+            "page_m": page_m
+        }
+
+        return data

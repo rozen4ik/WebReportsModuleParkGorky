@@ -38,7 +38,7 @@ class ReportXLS:
         font_title.borders.left = font_title.borders.THIN
         font_title.borders.right = font_title.borders.THIN
 
-        ws.write_merge(0, 0, 0, 4, "Отчёт по продажам билетов", font_title)
+        ws.write_merge(0, 0, 0, 4, "Отчёт по статистике продаж по местам", font_title)
 
         font_zag = xlwt.XFStyle()
         font_zag.font.name = "Times New Roman"
@@ -711,6 +711,135 @@ class ReportXLS:
             row_num += 1
             ws.write_merge(row_num, row_num, 0, 1, str(row[0]), font_style)
             ws.write_merge(row_num, row_num, 2, 8, str(row[1]), font_style)
+
+        wb.save(response)
+
+        return response
+
+    def __get_sale_ident(self, sale_ident):
+        return sale_ident.values_list(
+            'date_s',
+            'type_s',
+            'hardware_code',
+            'user_code',
+            'condition',
+            'desk',
+            'bill',
+            'service',
+            'price'
+        )
+
+    def get_export_sale_ident(self, request):
+        response = HttpResponse(content_type="applications/ms-excel")
+        date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+        response["Content-Disposition"] = "attachment; filename=SaleIdent " + str(date) + ".xls"
+
+        wb = xlwt.Workbook(encoding="utf-8")
+        ws = wb.add_sheet("report")
+        row_num = 1
+        font_title = xlwt.XFStyle()
+        font_title.font.name = "Times New Roman"
+        font_title.font.height = 20 * 14
+        font_title.font.bold = True
+        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
+        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
+        col_pat = xlwt.Pattern()
+        col_pat.pattern = col_pat.SOLID_PATTERN
+        col_pat.pattern_fore_colour = 22
+        col_pat.pattern_back_colour = 4
+        font_title.pattern = col_pat
+        font_title.borders.top = font_title.borders.THIN
+        font_title.borders.bottom = font_title.borders.THIN
+        font_title.borders.left = font_title.borders.THIN
+        font_title.borders.right = font_title.borders.THIN
+
+        ws.write_merge(0, 0, 0, 8, "Продажи индификаторов за период", font_title)
+
+        font_zag = xlwt.XFStyle()
+        font_zag.font.name = "Times New Roman"
+        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
+        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
+        font_zag.font.bold = False
+        font_zag.borders.top = font_zag.borders.THIN
+        font_zag.borders.bottom = font_zag.borders.THIN
+        font_zag.borders.left = font_zag.borders.THIN
+        font_zag.borders.right = font_zag.borders.THIN
+        font_zag.font.height = 20 * 12
+
+        columns = [
+            "Дата",
+            "Тип",
+            "Аппаратный код",
+            "Пользовательский код",
+            "Состояние",
+            "Касса",
+            "Счет",
+            "Услуга",
+            "Стоимость"
+        ]
+
+        len_date_s = len(columns[0])
+        len_type_s = len(columns[1])
+        len_hardware_code = len(columns[2])
+        len_user_code = len(columns[3])
+        len_condition = len(columns[4])
+        len_desk = len(columns[5])
+        len_bill = len(columns[6])
+        len_service = len(columns[7])
+        len_price = len(columns[8])
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_zag)
+
+        font_style = xlwt.XFStyle()
+        font_style.font.name = "Times New Roman"
+        font_style.font.bold = False
+        font_style.borders.top = font_zag.borders.THIN
+        font_style.borders.bottom = font_zag.borders.THIN
+        font_style.borders.left = font_zag.borders.THIN
+        font_style.borders.right = font_zag.borders.THIN
+        font_style.font.height = 20 * 12
+
+        sale_ident = self.__get_sale_ident(SaleIdent.objects.all())
+        rows = sale_ident
+
+        for i in sale_ident:
+            if len_date_s < len(i[0]):
+                len_date_s = len(i[0])
+            if len_type_s < len(i[1]):
+                len_type_s = len(i[1])
+            if len_hardware_code < len(i[2]):
+                len_hardware_code = len(i[2])
+            if len_user_code < len(i[3]):
+                len_user_code = len(i[3])
+            if len_condition < len(i[4]):
+                len_condition = len(i[4])
+            if len_desk < len(i[5]):
+                len_desk = len(i[5])
+            if len_bill < len(i[6]):
+                len_bill = len(i[6])
+            if len_service < len(i[7]):
+                len_service = len(i[7])
+            if len_price < len(i[8]):
+                len_price = len(i[8])
+
+        width_col = [
+            len_date_s,
+            len_type_s,
+            len_hardware_code,
+            len_user_code,
+            len_condition,
+            len_desk,
+            len_bill,
+            len_service,
+            len_price
+        ]
+
+        for row in rows:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 3)
+                ws.write(row_num, col_num, str(row[col_num]), font_style)
 
         wb.save(response)
 

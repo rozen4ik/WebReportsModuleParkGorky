@@ -60,6 +60,15 @@ def desk_shift(request):
     return render(request, "reports/result_desk_shift.html", data)
 
 
+def sale_ident(request):
+    if request.user.is_authenticated:
+        report = Report()
+        data = report.get_sale_ident(request)
+    else:
+        data = {}
+    return render(request, "reports/result_sale_ident.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')
@@ -98,4 +107,10 @@ def export_service_list(request):
 def export_desk_shift(request):
     report_xls = ReportXLS()
     response = report_xls.get_export_desk_shift(request)
+    return response
+
+
+def export_sale_ident(request):
+    report_xls = ReportXLS()
+    response = report_xls.get_export_sale_ident(request)
     return response

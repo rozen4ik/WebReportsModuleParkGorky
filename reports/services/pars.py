@@ -186,5 +186,35 @@ class Pars:
                 count += 1
             additional_information_about_the_desk_register.save()
             count = 0
-        # additional_information_about_the_desk_register = AdditionalInformationAboutTheDeskRegister.objects.all()
-        # additional_information_about_the_desk_register = additional_information_about_the_desk_register[0].delete()
+
+    def pars_sale_ident(self, trs, tag):
+        count = 0
+        sale_ident = SaleIdent.objects.all().delete()
+        for tr in trs:
+            cap = tr.find_all(tag)
+            sale_ident = SaleIdent()
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                if count == 1:
+                    sale_ident.date_s = caps
+                elif count == 2:
+                    sale_ident.type_s = caps
+                elif count == 3:
+                    sale_ident.hardware_code = caps
+                elif count == 4:
+                    sale_ident.user_code = caps
+                elif count == 5:
+                    sale_ident.condition = caps
+                elif count == 6:
+                    sale_ident.desk = caps
+                elif count == 7:
+                    sale_ident.bill = caps
+                elif count == 8:
+                    sale_ident.service = caps
+                elif count == 9:
+                    sale_ident.price = caps
+                count += 1
+            sale_ident.save()
+            count = 0
+        sale_ident = SaleIdent.objects.all()
+        sale_ident = sale_ident[0].delete()
