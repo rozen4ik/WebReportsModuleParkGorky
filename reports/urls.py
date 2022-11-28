@@ -9,6 +9,7 @@ urlpatterns = [
     path('service_list/', views.service_list),
     path('desk_shift/', views.desk_shift),
     path('sale_ident/', views.sale_ident),
+    path('sales_by_cat/', views.sales_by_cat),
     path('export_stat_bill/', views.export_stat_bill, name='export-stat-bill'),
     path('export_passage/', views.export_passage, name='export-passage'),
     path('export_rule_list/', views.export_rule_list, name='export-rule-list'),

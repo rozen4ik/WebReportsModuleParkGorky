@@ -69,6 +69,15 @@ def sale_ident(request):
     return render(request, "reports/result_sale_ident.html", data)
 
 
+def sales_by_cat(request):
+    if request.user.is_authenticated:
+        report = Report()
+        data = report.get_sales_by_cat(request)
+    else:
+        data = {}
+    return render(request, "reports/result_sales_by_cat.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')

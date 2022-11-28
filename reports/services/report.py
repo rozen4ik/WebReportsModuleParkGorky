@@ -527,3 +527,6 @@ class Report:
         }
 
         return data
+
+    def get_sales_by_cat(self, request):
+        pass
