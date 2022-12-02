@@ -529,4 +529,24 @@ class Report:
         return data
 
     def get_sales_by_cat(self, request):
-        pass
+        user = User.objects.all().select_related('profile')
+        access = self.get_access(request)
+        config = Conf.objects.get(id=1)
+        start_d = "2022-10-20 00:00:00"
+        end_d = "2022-10-27 00:00:00"
+        fo = ""
+        pars = Pars()
+        con = self.settings_firebird(config)
+        cur = con.cursor()
+        tables = cur.execute(
+            "select "
+            "* "
+            "from "
+            f"HTML$SALES_BY_CAT('{start_d}', '{end_d}', null, null, null, null) "
+        ).fetchall()
+
+        con.commit()
+        con.close()
+
+        for i in tables:
+            print(i)
