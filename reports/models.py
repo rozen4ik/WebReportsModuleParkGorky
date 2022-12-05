@@ -108,3 +108,11 @@ class SaleIdent(models.Model):
     bill = models.CharField(max_length=250, blank=True, null=True)
     service = models.CharField(max_length=250, blank=True, null=True)
     price = models.CharField(max_length=250, blank=True, null=True)
+
+
+class SalesByCat(models.Model):
+    code_name = models.CharField(max_length=250, blank=True, null=True)
+    count = models.CharField(max_length=250, blank=True, null=True)
+    summ = models.CharField(max_length=250, blank=True, null=True)
+    discount = models.CharField(max_length=250, blank=True, null=True)
+    all_s = models.CharField(max_length=250, blank=True, null=True)

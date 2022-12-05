@@ -532,21 +532,55 @@ class Report:
         user = User.objects.all().select_related('profile')
         access = self.get_access(request)
         config = Conf.objects.get(id=1)
-        start_d = "2022-10-20 00:00:00"
-        end_d = "2022-10-27 00:00:00"
+        start_d = "01.01.01"
+        end_d = "01.01.01"
+        ticket_form = TicketSales(request.GET)
         fo = ""
         pars = Pars()
+        sales_by_cat = SalesByCat.objects.all()
         con = self.settings_firebird(config)
-        cur = con.cursor()
-        tables = cur.execute(
-            "select "
-            "* "
-            "from "
-            f"HTML$SALES_BY_CAT('{start_d}', '{end_d}', null, null, null, null) "
-        ).fetchall()
 
-        con.commit()
-        con.close()
+        if ticket_form.is_valid():
+            filter_ticket = ticket_form.cleaned_data
+            start_d = ticket_form.cleaned_data["start_date"]
+            end_d = ticket_form.cleaned_data["end_date"]
 
-        for i in tables:
-            print(i)
+            if filter_ticket != {'start_date': None, 'end_date': None}:
+                fo = "yes"
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "* "
+                    "from "
+                    f"HTML$SALES_BY_CAT('{start_d}', '{end_d}', null, null, null, null) "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                st = ""
+                for i in tables:
+                    st += f"{i[0]}"
+
+                st = st.replace("charset=windows-1251", "charset=utf-8")
+                with open('result_scan_sales_by_cat.html', 'w') as output_file:
+                    output_file.write(st)
+
+                with open("result_scan_sales_by_cat.html") as fp:
+                    soup = BeautifulSoup(fp, "lxml")
+
+                trs = soup.find_all('table')[1].find_all('tr')
+                pars.pars_sales_by_cat(trs, 'td')
+                sales_by_cat = SalesByCat.objects.all()
+
+                os.remove("result_scan_sales_by_cat.html")
+
+        data = {
+            "access": access,
+            "fo": fo,
+            "ticket_form": ticket_form,
+            "sales_by_cat": sales_by_cat
+        }
+
+        return data

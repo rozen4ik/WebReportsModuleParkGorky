@@ -15,5 +15,6 @@ urlpatterns = [
     path('export_rule_list/', views.export_rule_list, name='export-rule-list'),
     path('export_service_list/', views.export_service_list, name='export-service-list'),
     path('export_desk_shift/', views.export_desk_shift, name='export-desk-shift'),
-    path('export_sale_ident/', views.export_sale_ident, name='export-sale-ident')
+    path('export_sale_ident/', views.export_sale_ident, name='export-sale-ident'),
+    path('export_sales_by_cat/', views.export_sales_by_cat, name='export-sales-by-cat')
 ]

@@ -123,3 +123,9 @@ def export_sale_ident(request):
     report_xls = ReportXLS()
     response = report_xls.get_export_sale_ident(request)
     return response
+
+
+def export_sales_by_cat(request):
+    report_xls = ReportXLS()
+    response = report_xls.get_export_sales_by_cat(request)
+    return response

@@ -218,3 +218,27 @@ class Pars:
             count = 0
         sale_ident = SaleIdent.objects.all()
         sale_ident = sale_ident[0].delete()
+
+    def pars_sales_by_cat(self, trs, tag):
+        count = 0
+        sales_by_cat = SalesByCat.objects.all().delete()
+        for tr in trs:
+            cap = tr.find_all(tag)
+            sales_by_cat = SalesByCat()
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                if count == 0:
+                    sales_by_cat.code_name = caps
+                elif count == 1:
+                    sales_by_cat.count = caps
+                elif count == 2:
+                    sales_by_cat.summ = caps
+                elif count == 3:
+                    sales_by_cat.discount = caps
+                elif count == 4:
+                    sales_by_cat.all_s = caps
+                count += 1
+            sales_by_cat.save()
+            count = 0
+        sales_by_cat = SalesByCat.objects.all()
+        sales_by_cat = sales_by_cat[0].delete()
