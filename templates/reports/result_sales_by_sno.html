@@ -1,0 +1,40 @@
+{% extends 'reports/forms/sales_by_sno.html' %}
+{% load static %}
+{% load spurl %}
+{% block sales_by_sno %}
+    <div class="table-responsive">
+        <form method="POST">
+            <a class="btn btn-primary" href="{% url 'export-sales-by-sno' %}" role="button">Скачать отчёт</a>
+            <p></p>
+        </form>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Услуга</th>
+                <th scope="col">Позиция</th>
+                <th scope="col">Цена</th>
+                <th scope="col">Кол-во</th>
+                <th scope="col">Сумма</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in sales_by_positions_stat %}
+                <tr class="align-middle">
+                    <td scope="row">{{ t.service }}</td>
+                    <td>{{ t.position }}</td>
+                    <td>{{ t.price }}</td>
+                    <td>{{ t.count }}</td>
+                    <td>{{ t.summ }}</td>
+                </tr>
+            {% endfor %}
+            {% for i in in_total %}
+            <tr class="align-middle">
+                <td colspan="3"><b>ВСЕГО</b></td>
+                <td><b>{{ i.count }}</b></td>
+                <td><b>{{ i.summ }}</b></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

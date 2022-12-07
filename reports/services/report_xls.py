@@ -851,3 +851,6 @@ class ReportXLS:
         wb.save(response)
 
         return response
+
+    def get_export_sales_by_sno(self):
+        pass

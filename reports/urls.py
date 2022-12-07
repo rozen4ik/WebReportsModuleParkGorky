@@ -11,6 +11,7 @@ urlpatterns = [
     path('sale_ident/', views.sale_ident),
     path('sales_by_cat/', views.sales_by_cat),
     path('sales_by_positions_stat/', views.sales_by_positions_stat),
+    path('sales_by_sno/', views.sales_by_sno),
     path('export_stat_bill/', views.export_stat_bill, name='export-stat-bill'),
     path('export_passage/', views.export_passage, name='export-passage'),
     path('export_rule_list/', views.export_rule_list, name='export-rule-list'),
@@ -18,5 +19,7 @@ urlpatterns = [
     path('export_desk_shift/', views.export_desk_shift, name='export-desk-shift'),
     path('export_sale_ident/', views.export_sale_ident, name='export-sale-ident'),
     path('export_sales_by_cat/', views.export_sales_by_cat, name='export-sales-by-cat'),
-    path('export_sales_by_positions_stat/', views.export_sales_by_positions_stat, name='export-sales-by-positions-stat')
+    path('export_sales_by_positions_stat/', views.export_sales_by_positions_stat,
+         name='export-sales-by-positions-stat'),
+    path('export_sales_by_sno/', views.export_sales_by_sno, name='export-sales-by-sno')
 ]

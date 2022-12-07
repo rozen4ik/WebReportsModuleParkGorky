@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Настройки</title>
+    <title>Отчёт по продаже с разбивкой по СНО</title>
     <link rel="stylesheet" href="{% static 'css/body.css' %}" type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -63,77 +63,41 @@
     </nav>
     <br>
     <div class="container back">
-        <br>
-        <h1>Настройки</h1>
-        <br>
-        <hr>
-        <form class="row g-3" method="POST">
-            {% csrf_token %}
-            <div class="col-md-3">
-                <label for="inputIpKontur" class="form-label">ip контура</label>
-                <input type="text" class="form-control" id="inputIpKontur" name="ip_kontur"
-                       value="{{ config.ip_kontur }}" required />
-            </div>
-            <div class="col-md-2">
-                <label for="inputPortKontur" class="form-label">порт контура</label>
-                <input type="text" class="form-control" id="inputPortKontur" name="port_kontur"
-                       value="{{ config.port_kontur }}" required />
-            </div>
-            <div class="col-md-4">
-                <label for="inputPath" class="form-label">путь к бд или алиас контура</label>
-                <input type="text" class="form-control" id="inputPath" name="path_to_db_kontur"
-                       value="{{ config.path_to_db_kontur }}" required />
-            </div>
-            <div class="col-md-3">
-                <label for="inputUserDbKontur" class="form-label">логин для доступа к контуру</label>
-                <input type="text" class="form-control" id="inputUserDbKontur" name="user_db_kontur"
-                       value="{{ config.user_db_kontur }}" required />
-            </div>
-            <div class="col-md-3">
-                <label for="inputPassDbKontur" class="form-label">пароль для доступа к контуру</label>
-                <input type="text" class="form-control" id="inputPassDbKontur" name="password_db_kontur"
-                       value="{{ config.password_db_kontur }}" required />
-            </div>
-            <div class="col-md-3">
-                <label for="inputIpSSH" class="form-label">ip для доступа по ssh к балону</label>
-                <input type="text" class="form-control" id="inputIpSSH" name="ip_ssh"
-                       value="{{ config.ip_ssh }}" required />
-            </div>
-            <div class="col-md-3">
-                <label for="inputUserSSH" class="form-label">логин для доступа по ssh к балону</label>
-                <input type="text" class="form-control" id="inputUserSSH" name="user_ssh"
-                       value="{{ config.user_ssh }}" required />
-            </div>
-            <div class="col-md-3">
-                <label for="inputPassSSH" class="form-label">пароль для доступа по ssh к балону</label>
-                <input type="text" class="form-control" id="inputPassSSH" name="password_ssh"
-                       value="{{ config.password_ssh }}" required />
-            </div>
-            <div class="col-md-3">
-                <label for="inputUserDbBaloon" class="form-label">логин для доступа к бд балона</label>
-                <input type="text" class="form-control" id="inputUserDbBaloon" name="user_db_baloon"
-                       value="{{ config.user_db_baloon }}" required />
-            </div>
-            <div class="col-md-3">
-                <label for="inputPassDbBaloon" class="form-label">пароль для доступа к бд балона</label>
-                <input type="text" class="form-control" id="inputPassDbBaloon" name="password_db_baloon"
-                       value="{{ config.password_db_baloon }}" required />
-            </div>
-            <div class="col-12">
-                <input type="submit" name="sun" class="btn btn-outline-primary contact-form__button" value="Сохранить">
-            </div>
-        </form>
     <br>
-    </div>
-{% else %}
-    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <div class="navbar-collapse" id="navbarScroll">
-                <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}" role="button">Войти</a>
-            </div>
+    <form class="row g-3" method="get" action="">
+        {% csrf_token %}
+        <h3>Укажите временной период</h3>
+        <div class="col-md-3">
+            <label for="{{ ticket_form.start_date.id_for_label }}">Начало периода</label>
+            {{ ticket_form.start_date }}
         </div>
-    </nav>
+        <div class="col-md-3">
+            <label for="{{ ticket_form.end_date.id_for_label }}">Конец периода</label>
+            {{ ticket_form.end_date }}
+        </div>
+        <div class="col-12">
+            <input type="submit" name="sun" class="btn btn-outline-primary contact-form__button"
+                   value="Подготовить отчёт">
+        </div>
+    </form>
     <br>
+    <hr>
+    <br>
+    {% if fo != "yes" %}
+        <div id="cont" style="display: none">
+    {% else %}
+        <div id="cont">
+            {% block sales_by_sno %}
+            {% endblock %}
+        </div>
+    {% endif %}
+</div>
+{% else %}
+    <div class="container-fluid">
+        <br>
+        <p>Войдите в систему</p>
+        <a class="btn btn-outline-primary" href="{% url 'login' %}" role="button">Войти</a>
+    </div>
 {% endif %}
 <br>
 {% block content %}

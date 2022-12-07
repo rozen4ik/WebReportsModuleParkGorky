@@ -652,3 +652,6 @@ class Report:
         }
 
         return data
+
+    def get_sales_by_sno(self, request):
+        pass
