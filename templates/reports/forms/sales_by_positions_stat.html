@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отчёт по проходам через турникет</title>
+    <title>Отчёт по продажам в разбивке по позициям в чеке</title>
     <link rel="stylesheet" href="{% static 'css/body.css' %}" type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -62,8 +62,8 @@
     </nav>
     <br>
     <div class="container back">
-        <br>
-        <form class="row g-3" method="get" action="">
+    <br>
+    <form class="row g-3" method="get" action="">
         {% csrf_token %}
         <h3>Укажите временной период</h3>
         <div class="col-md-3">
@@ -86,20 +86,17 @@
         <div id="cont" style="display: none">
     {% else %}
         <div id="cont">
-            {% block passage %}
+            {% block sales_by_positions_stat %}
             {% endblock %}
         </div>
     {% endif %}
-    </div>
+</div>
 {% else %}
-    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <div class="navbar-collapse" id="navbarScroll">
-                <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}" role="button">Войти</a>
-            </div>
-        </div>
-    </nav>
-    <br>
+    <div class="container-fluid">
+        <br>
+        <p>Войдите в систему</p>
+        <a class="btn btn-outline-primary" href="{% url 'login' %}" role="button">Войти</a>
+    </div>
 {% endif %}
 <br>
 {% block content %}

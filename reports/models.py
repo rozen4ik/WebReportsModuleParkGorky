@@ -116,3 +116,16 @@ class SalesByCat(models.Model):
     summ = models.CharField(max_length=250, blank=True, null=True)
     discount = models.CharField(max_length=250, blank=True, null=True)
     all_s = models.CharField(max_length=250, blank=True, null=True)
+
+
+class SalesByPositionsStat(models.Model):
+    service = models.CharField(max_length=250, blank=True, null=True)
+    position = models.CharField(max_length=250, blank=True, null=True)
+    price = models.CharField(max_length=250, blank=True, null=True)
+    count = models.CharField(max_length=250, blank=True, null=True)
+    summ = models.CharField(max_length=250, blank=True, null=True)
+
+
+class InTotal(models.Model):
+    count = models.CharField(max_length=250, blank=True, null=True)
+    summ = models.CharField(max_length=250, blank=True, null=True)

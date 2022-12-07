@@ -538,7 +538,6 @@ class Report:
         fo = ""
         pars = Pars()
         sales_by_cat = SalesByCat.objects.all()
-        con = self.settings_firebird(config)
 
         if ticket_form.is_valid():
             filter_ticket = ticket_form.cleaned_data
@@ -581,6 +580,75 @@ class Report:
             "fo": fo,
             "ticket_form": ticket_form,
             "sales_by_cat": sales_by_cat
+        }
+
+        return data
+
+    def get_sales_by_positions_stat(self, request):
+        user = User.objects.all().select_related('profile')
+        access = self.get_access(request)
+        config = Conf.objects.get(id=1)
+        start_d = "01.01.01"
+        end_d = "01.01.01"
+        ticket_form = TicketSales(request.GET)
+        fo = ""
+        in_total = InTotal.objects.all().delete()
+        pars = Pars()
+        sales_by_positions_stat = SalesByPositionsStat.objects.all()
+
+        if ticket_form.is_valid():
+            filter_ticket = ticket_form.cleaned_data
+            start_d = ticket_form.cleaned_data["start_date"]
+            end_d = ticket_form.cleaned_data["end_date"]
+
+            if filter_ticket != {'start_date': None, 'end_date': None}:
+                fo = "yes"
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "* "
+                    "from "
+                    f"HTML$SALES_BY_POSITIONS_STAT('{start_d}', '{end_d}') "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                st = ""
+                for i in tables:
+                    st += f"{i[0]}"
+
+                st = st.replace("charset=windows-1251", "charset=utf-8")
+                with open('result_scan_sales_by_positions_stat.html', 'w') as output_file:
+                    output_file.write(st)
+
+                with open("result_scan_sales_by_positions_stat.html") as fp:
+                    soup = BeautifulSoup(fp, "lxml")
+
+                trs = soup.find_all('table')[1].find_all('tr')
+                pars.pars_sales_by_positions_stat(trs, 'td')
+                sales_by_positions_stat = SalesByPositionsStat.objects.all()
+                sales_by_positions_stat = sales_by_positions_stat.order_by("-id")
+                in_total = InTotal()
+                in_total.count = sales_by_positions_stat[0].service
+                in_total.summ = sales_by_positions_stat[0].position
+                in_total.save()
+                sales_by_positions_stat = sales_by_positions_stat[0].delete()
+                sales_by_positions_stat = SalesByPositionsStat.objects.all()
+                in_total = InTotal.objects.all()
+
+                for i in in_total:
+                    print(f"{i.count} - {i.summ}")
+
+                os.remove("result_scan_sales_by_positions_stat.html")
+
+        data = {
+            "access": access,
+            "fo": fo,
+            "ticket_form": ticket_form,
+            "sales_by_positions_stat": sales_by_positions_stat,
+            "in_total": in_total
         }
 
         return data

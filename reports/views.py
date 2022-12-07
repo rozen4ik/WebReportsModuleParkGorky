@@ -78,6 +78,15 @@ def sales_by_cat(request):
     return render(request, "reports/result_sales_by_cat.html", data)
 
 
+def sales_by_positions_stat(request):
+    if request.user.is_authenticated:
+        report = Report()
+        data = report.get_sales_by_positions_stat(request)
+    else:
+        data = {}
+    return render(request, "reports/result_sales_by_positions_stat.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')
@@ -91,41 +100,47 @@ def get_access(request):
 
 def export_stat_bill(request):
     report_xls = ReportXLS()
-    response = report_xls.get_export_stat_bill(request)
+    response = report_xls.get_export_stat_bill()
     return response
 
 
 def export_passage(request):
     report_xls = ReportXLS()
-    response = report_xls.get_export_passage(request)
+    response = report_xls.get_export_passage()
     return response
 
 
 def export_rule_list(request):
     report_xls = ReportXLS()
-    response = report_xls.get_export_rule_list(request)
+    response = report_xls.get_export_rule_list()
     return response
 
 
 def export_service_list(request):
     report_xls = ReportXLS()
-    response = report_xls.get_export_service_list(request)
+    response = report_xls.get_export_service_list()
     return response
 
 
 def export_desk_shift(request):
     report_xls = ReportXLS()
-    response = report_xls.get_export_desk_shift(request)
+    response = report_xls.get_export_desk_shift()
     return response
 
 
 def export_sale_ident(request):
     report_xls = ReportXLS()
-    response = report_xls.get_export_sale_ident(request)
+    response = report_xls.get_export_sale_ident()
     return response
 
 
 def export_sales_by_cat(request):
     report_xls = ReportXLS()
-    response = report_xls.get_export_sales_by_cat(request)
+    response = report_xls.get_export_sales_by_cat()
+    return response
+
+
+def export_sales_by_positions_stat(request):
+    report_xls = ReportXLS()
+    response = report_xls.get_export_sales_by_positions_stat()
     return response

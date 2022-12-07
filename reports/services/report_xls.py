@@ -5,6 +5,27 @@ from reports.models import *
 
 
 class ReportXLS:
+    def __settings_font(self, name, height, bold, center, cap):
+        font = xlwt.XFStyle()
+        font.font.name = name
+        font.font.height = height
+        font.font.bold = bold
+        font.borders.top = font.borders.THIN
+        font.borders.bottom = font.borders.THIN
+        font.borders.left = font.borders.THIN
+        font.borders.right = font.borders.THIN
+        if center == "yes":
+            font.alignment.vert = font.alignment.VERT_BOTTOM
+            font.alignment.horz = font.alignment.HORZ_CENTER
+        if cap == "yes":
+            col_pat = xlwt.Pattern()
+            col_pat.pattern = col_pat.SOLID_PATTERN
+            col_pat.pattern_fore_colour = 22
+            col_pat.pattern_back_colour = 4
+            font.pattern = col_pat
+        return font
+
+
     def __get_stat_bill(self, kontur):
         return kontur.values_list(
             "date_bill",
@@ -14,7 +35,7 @@ class ReportXLS:
             "date_of_ticket_passage",
         )
 
-    def get_export_stat_bill(self, request):
+    def get_export_stat_bill(self):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         response["Content-Disposition"] = "attachment; filename=StatBill " + str(date) + ".xls"
@@ -22,34 +43,11 @@ class ReportXLS:
         wb = xlwt.Workbook(encoding="utf-8")
         ws = wb.add_sheet("report")
         row_num = 1
-        font_title = xlwt.XFStyle()
-        font_title.font.name = "Times New Roman"
-        font_title.font.height = 20 * 14
-        font_title.font.bold = True
-        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
-        col_pat = xlwt.Pattern()
-        col_pat.pattern = col_pat.SOLID_PATTERN
-        col_pat.pattern_fore_colour = 22
-        col_pat.pattern_back_colour = 4
-        font_title.pattern = col_pat
-        font_title.borders.top = font_title.borders.THIN
-        font_title.borders.bottom = font_title.borders.THIN
-        font_title.borders.left = font_title.borders.THIN
-        font_title.borders.right = font_title.borders.THIN
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
 
         ws.write_merge(0, 0, 0, 4, "Отчёт по статистике продаж по местам", font_title)
 
-        font_zag = xlwt.XFStyle()
-        font_zag.font.name = "Times New Roman"
-        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
-        font_zag.font.bold = False
-        font_zag.borders.top = font_zag.borders.THIN
-        font_zag.borders.bottom = font_zag.borders.THIN
-        font_zag.borders.left = font_zag.borders.THIN
-        font_zag.borders.right = font_zag.borders.THIN
-        font_zag.font.height = 20 * 12
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
         columns = [
             "Дата продажи",
@@ -68,14 +66,7 @@ class ReportXLS:
         for col_num in range(len(columns)):
             ws.write(row_num, col_num, columns[col_num], font_zag)
 
-        font_style = xlwt.XFStyle()
-        font_style.font.name = "Times New Roman"
-        font_style.font.bold = False
-        font_style.borders.top = font_zag.borders.THIN
-        font_style.borders.bottom = font_zag.borders.THIN
-        font_style.borders.left = font_zag.borders.THIN
-        font_style.borders.right = font_zag.borders.THIN
-        font_style.font.height = 20 * 12
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
 
         kontur = self.__get_stat_bill(Kontur.objects.all().order_by("date_bill"))
         rows = kontur
@@ -119,7 +110,7 @@ class ReportXLS:
             'identifier_value',
         )
 
-    def get_export_passage(self, request):
+    def get_export_passage(self):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         response["Content-Disposition"] = "attachment; filename=Passage " + str(date) + ".xls"
@@ -127,34 +118,11 @@ class ReportXLS:
         wb = xlwt.Workbook(encoding="utf-8")
         ws = wb.add_sheet("report")
         row_num = 1
-        font_title = xlwt.XFStyle()
-        font_title.font.name = "Times New Roman"
-        font_title.font.height = 20 * 14
-        font_title.font.bold = True
-        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
-        col_pat = xlwt.Pattern()
-        col_pat.pattern = col_pat.SOLID_PATTERN
-        col_pat.pattern_fore_colour = 22
-        col_pat.pattern_back_colour = 4
-        font_title.pattern = col_pat
-        font_title.borders.top = font_title.borders.THIN
-        font_title.borders.bottom = font_title.borders.THIN
-        font_title.borders.left = font_title.borders.THIN
-        font_title.borders.right = font_title.borders.THIN
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
 
         ws.write_merge(0, 0, 0, 4, "Отчёт по проходам через турникеты", font_title)
 
-        font_zag = xlwt.XFStyle()
-        font_zag.font.name = "Times New Roman"
-        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
-        font_zag.font.bold = False
-        font_zag.borders.top = font_zag.borders.THIN
-        font_zag.borders.bottom = font_zag.borders.THIN
-        font_zag.borders.left = font_zag.borders.THIN
-        font_zag.borders.right = font_zag.borders.THIN
-        font_zag.font.height = 20 * 12
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
         columns = [
             "Дата прохода",
@@ -173,14 +141,7 @@ class ReportXLS:
         for col_num in range(len(columns)):
             ws.write(row_num, col_num, columns[col_num], font_zag)
 
-        font_style = xlwt.XFStyle()
-        font_style.font.name = "Times New Roman"
-        font_style.font.bold = False
-        font_style.borders.top = font_zag.borders.THIN
-        font_style.borders.bottom = font_zag.borders.THIN
-        font_style.borders.left = font_zag.borders.THIN
-        font_style.borders.right = font_zag.borders.THIN
-        font_style.font.height = 20 * 12
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
 
         passages_turnstiles = self.__get_passage(PassagesTurnstile.objects.all().order_by('resolution_timestamp'))
         rows = passages_turnstiles
@@ -220,7 +181,7 @@ class ReportXLS:
             'rule_use',
         )
 
-    def get_export_rule_list(self, request):
+    def get_export_rule_list(self):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         response["Content-Disposition"] = "attachment; filename=RuleList " + str(date) + ".xls"
@@ -228,32 +189,8 @@ class ReportXLS:
         wb = xlwt.Workbook(encoding="utf-8")
         ws = wb.add_sheet("report")
         row_num = 1
-        font_title = xlwt.XFStyle()
-        font_title.font.name = "Times New Roman"
-        font_title.font.height = 20 * 14
-        font_title.font.bold = True
-        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
-        col_pat = xlwt.Pattern()
-        col_pat.pattern = col_pat.SOLID_PATTERN
-        col_pat.pattern_fore_colour = 22
-        col_pat.pattern_back_colour = 4
-        font_title.pattern = col_pat
-        font_title.borders.top = font_title.borders.THIN
-        font_title.borders.bottom = font_title.borders.THIN
-        font_title.borders.left = font_title.borders.THIN
-        font_title.borders.right = font_title.borders.THIN
-
-        font_zag = xlwt.XFStyle()
-        font_zag.font.name = "Times New Roman"
-        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
-        font_zag.font.bold = False
-        font_zag.borders.top = font_zag.borders.THIN
-        font_zag.borders.bottom = font_zag.borders.THIN
-        font_zag.borders.left = font_zag.borders.THIN
-        font_zag.borders.right = font_zag.borders.THIN
-        font_zag.font.height = 20 * 12
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
         columns = [
             "Отчёт по правилам пользования",
@@ -265,14 +202,7 @@ class ReportXLS:
         ws.write(0, 0, columns[0], font_title)
         ws.write(row_num, 0, columns[1], font_zag)
 
-        font_style = xlwt.XFStyle()
-        font_style.font.name = "Times New Roman"
-        font_style.font.bold = False
-        font_style.borders.top = font_zag.borders.THIN
-        font_style.borders.bottom = font_zag.borders.THIN
-        font_style.borders.left = font_zag.borders.THIN
-        font_style.borders.right = font_zag.borders.THIN
-        font_style.font.height = 20 * 12
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
 
         r_list = self.__get_rule_list(RuleList.objects.all())
         rows = r_list
@@ -296,7 +226,7 @@ class ReportXLS:
             'service',
         )
 
-    def get_export_service_list(self, request):
+    def get_export_service_list(self):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         response["Content-Disposition"] = "attachment; filename=ServiceList " + str(date) + ".xls"
@@ -304,32 +234,8 @@ class ReportXLS:
         wb = xlwt.Workbook(encoding="utf-8")
         ws = wb.add_sheet("report")
         row_num = 1
-        font_title = xlwt.XFStyle()
-        font_title.font.name = "Times New Roman"
-        font_title.font.height = 20 * 14
-        font_title.font.bold = True
-        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
-        col_pat = xlwt.Pattern()
-        col_pat.pattern = col_pat.SOLID_PATTERN
-        col_pat.pattern_fore_colour = 22
-        col_pat.pattern_back_colour = 4
-        font_title.pattern = col_pat
-        font_title.borders.top = font_title.borders.THIN
-        font_title.borders.bottom = font_title.borders.THIN
-        font_title.borders.left = font_title.borders.THIN
-        font_title.borders.right = font_title.borders.THIN
-
-        font_zag = xlwt.XFStyle()
-        font_zag.font.name = "Times New Roman"
-        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
-        font_zag.font.bold = False
-        font_zag.borders.top = font_zag.borders.THIN
-        font_zag.borders.bottom = font_zag.borders.THIN
-        font_zag.borders.left = font_zag.borders.THIN
-        font_zag.borders.right = font_zag.borders.THIN
-        font_zag.font.height = 20 * 12
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
         columns = [
             "Отчёт по услугам",
@@ -341,14 +247,7 @@ class ReportXLS:
         ws.write(0, 0, columns[0], font_title)
         ws.write(row_num, 0, columns[1], font_zag)
 
-        font_style = xlwt.XFStyle()
-        font_style.font.name = "Times New Roman"
-        font_style.font.bold = False
-        font_style.borders.top = font_zag.borders.THIN
-        font_style.borders.bottom = font_zag.borders.THIN
-        font_style.borders.left = font_zag.borders.THIN
-        font_style.borders.right = font_zag.borders.THIN
-        font_style.font.height = 20 * 12
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
 
         s_list = self.__get_service_list(ServiceList.objects.all())
         rows = s_list
@@ -429,7 +328,7 @@ class ReportXLS:
             'comment'
         )
 
-    def get_export_desk_shift(self, request):
+    def get_export_desk_shift(self):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         response["Content-Disposition"] = "attachment; filename=DeskShift " + str(date) + ".xls"
@@ -437,34 +336,11 @@ class ReportXLS:
         wb = xlwt.Workbook(encoding="utf-8")
         ws = wb.add_sheet("report")
         row_num = 1
-        font_title = xlwt.XFStyle()
-        font_title.font.name = "Times New Roman"
-        font_title.font.height = 20 * 14
-        font_title.font.bold = True
-        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
-        col_pat = xlwt.Pattern()
-        col_pat.pattern = col_pat.SOLID_PATTERN
-        col_pat.pattern_fore_colour = 22
-        col_pat.pattern_back_colour = 4
-        font_title.pattern = col_pat
-        font_title.borders.top = font_title.borders.THIN
-        font_title.borders.bottom = font_title.borders.THIN
-        font_title.borders.left = font_title.borders.THIN
-        font_title.borders.right = font_title.borders.THIN
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
 
         ws.write_merge(0, 0, 0, 8, "Z-Отчёт по кассе", font_title)
 
-        font_zag = xlwt.XFStyle()
-        font_zag.font.name = "Times New Roman"
-        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
-        font_zag.font.bold = False
-        font_zag.borders.top = font_zag.borders.THIN
-        font_zag.borders.bottom = font_zag.borders.THIN
-        font_zag.borders.left = font_zag.borders.THIN
-        font_zag.borders.right = font_zag.borders.THIN
-        font_zag.font.height = 20 * 12
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
         columns = [
             "Номер смены",
@@ -491,14 +367,7 @@ class ReportXLS:
         for col_num in range(len(columns)):
             ws.write(row_num, col_num, columns[col_num], font_zag)
 
-        font_style = xlwt.XFStyle()
-        font_style.font.name = "Times New Roman"
-        font_style.font.bold = False
-        font_style.borders.top = font_zag.borders.THIN
-        font_style.borders.bottom = font_zag.borders.THIN
-        font_style.borders.left = font_zag.borders.THIN
-        font_style.borders.right = font_zag.borders.THIN
-        font_style.font.height = 20 * 12
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
 
         report_z_desk = self.__get_report_z_desk(ReportZDesk.objects.all())
         rows = report_z_desk
@@ -729,7 +598,7 @@ class ReportXLS:
             'price'
         )
 
-    def get_export_sale_ident(self, request):
+    def get_export_sale_ident(self):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         response["Content-Disposition"] = "attachment; filename=SaleIdent " + str(date) + ".xls"
@@ -737,34 +606,11 @@ class ReportXLS:
         wb = xlwt.Workbook(encoding="utf-8")
         ws = wb.add_sheet("report")
         row_num = 1
-        font_title = xlwt.XFStyle()
-        font_title.font.name = "Times New Roman"
-        font_title.font.height = 20 * 14
-        font_title.font.bold = True
-        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
-        col_pat = xlwt.Pattern()
-        col_pat.pattern = col_pat.SOLID_PATTERN
-        col_pat.pattern_fore_colour = 22
-        col_pat.pattern_back_colour = 4
-        font_title.pattern = col_pat
-        font_title.borders.top = font_title.borders.THIN
-        font_title.borders.bottom = font_title.borders.THIN
-        font_title.borders.left = font_title.borders.THIN
-        font_title.borders.right = font_title.borders.THIN
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
 
         ws.write_merge(0, 0, 0, 8, "Продажи индификаторов за период", font_title)
 
-        font_zag = xlwt.XFStyle()
-        font_zag.font.name = "Times New Roman"
-        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
-        font_zag.font.bold = False
-        font_zag.borders.top = font_zag.borders.THIN
-        font_zag.borders.bottom = font_zag.borders.THIN
-        font_zag.borders.left = font_zag.borders.THIN
-        font_zag.borders.right = font_zag.borders.THIN
-        font_zag.font.height = 20 * 12
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
         columns = [
             "Дата",
@@ -791,14 +637,7 @@ class ReportXLS:
         for col_num in range(len(columns)):
             ws.write(row_num, col_num, columns[col_num], font_zag)
 
-        font_style = xlwt.XFStyle()
-        font_style.font.name = "Times New Roman"
-        font_style.font.bold = False
-        font_style.borders.top = font_zag.borders.THIN
-        font_style.borders.bottom = font_zag.borders.THIN
-        font_style.borders.left = font_zag.borders.THIN
-        font_style.borders.right = font_zag.borders.THIN
-        font_style.font.height = 20 * 12
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
 
         sale_ident = self.__get_sale_ident(SaleIdent.objects.all())
         rows = sale_ident
@@ -854,7 +693,7 @@ class ReportXLS:
             'all_s'
         )
 
-    def get_export_sales_by_cat(self, request):
+    def get_export_sales_by_cat(self):
         response = HttpResponse(content_type="applications/ms-excel")
         date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         response["Content-Disposition"] = "attachment; filename=SalesByCat " + str(date) + ".xls"
@@ -862,34 +701,11 @@ class ReportXLS:
         wb = xlwt.Workbook(encoding="utf-8")
         ws = wb.add_sheet("report")
         row_num = 1
-        font_title = xlwt.XFStyle()
-        font_title.font.name = "Times New Roman"
-        font_title.font.height = 20 * 14
-        font_title.font.bold = True
-        font_title.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_title.alignment.horz = font_title.alignment.HORZ_CENTER
-        col_pat = xlwt.Pattern()
-        col_pat.pattern = col_pat.SOLID_PATTERN
-        col_pat.pattern_fore_colour = 22
-        col_pat.pattern_back_colour = 4
-        font_title.pattern = col_pat
-        font_title.borders.top = font_title.borders.THIN
-        font_title.borders.bottom = font_title.borders.THIN
-        font_title.borders.left = font_title.borders.THIN
-        font_title.borders.right = font_title.borders.THIN
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
 
         ws.write_merge(0, 0, 0, 5, "Продажи с разбивкой по категориям", font_title)
 
-        font_zag = xlwt.XFStyle()
-        font_zag.font.name = "Times New Roman"
-        font_zag.alignment.vert = font_title.alignment.VERT_BOTTOM
-        font_zag.alignment.horz = font_title.alignment.HORZ_CENTER
-        font_zag.font.bold = False
-        font_zag.borders.top = font_zag.borders.THIN
-        font_zag.borders.bottom = font_zag.borders.THIN
-        font_zag.borders.left = font_zag.borders.THIN
-        font_zag.borders.right = font_zag.borders.THIN
-        font_zag.font.height = 20 * 12
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
         columns = [
             "Код",
@@ -909,14 +725,7 @@ class ReportXLS:
         for col_num in range(len(columns)):
             ws.write(row_num, col_num, columns[col_num], font_zag)
 
-        font_style = xlwt.XFStyle()
-        font_style.font.name = "Times New Roman"
-        font_style.font.bold = False
-        font_style.borders.top = font_zag.borders.THIN
-        font_style.borders.bottom = font_zag.borders.THIN
-        font_style.borders.left = font_zag.borders.THIN
-        font_style.borders.right = font_zag.borders.THIN
-        font_style.font.height = 20 * 12
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
 
         sales_by_cat = self.__get_sales_by_cat(SalesByCat.objects.all())
         rows = sales_by_cat
@@ -946,6 +755,98 @@ class ReportXLS:
             for col_num in range(len(row)):
                 ws.col(col_num).width = 256 * (int(width_col[col_num]) + 3)
                 ws.write(row_num, col_num+1, str(row[col_num]), font_style)
+
+        wb.save(response)
+
+        return response
+
+    def __get_sales_by_positions_stat(self, sales_by_positions_stat):
+        return sales_by_positions_stat.values_list(
+            'service',
+            'position',
+            'price',
+            'count',
+            'summ'
+        )
+
+    def __get_in_total(self, in_total):
+        return in_total.values_list(
+            'count',
+            'summ'
+        )
+
+    def get_export_sales_by_positions_stat(self):
+        response = HttpResponse(content_type="applications/ms-excel")
+        date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+        response["Content-Disposition"] = "attachment; filename=SalesByPositionsStat " + str(date) + ".xls"
+
+        wb = xlwt.Workbook(encoding="utf-8")
+        ws = wb.add_sheet("report")
+        row_num = 1
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
+
+        ws.write_merge(0, 0, 0, 4, "Продажи в разбивке по позициям в чеке", font_title)
+
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
+
+        columns = [
+            "Услуга",
+            "Позиция",
+            "Цена",
+            "Кол-во",
+            "Сумма",
+        ]
+
+        len_service = len(columns[0])
+        len_position = len(columns[1])
+        len_price = len(columns[2])
+        len_count = len(columns[3])
+        len_summ = len(columns[4])
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_zag)
+
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
+
+        sales_by_positions_stat = self.__get_sales_by_positions_stat(SalesByPositionsStat.objects.all())
+        rows = sales_by_positions_stat
+
+        for i in sales_by_positions_stat:
+            if len_service < len(i[0]):
+                len_service = len(i[0])
+            if len_position < len(i[1]):
+                len_position = len(i[1])
+            if len_price < len(i[2]):
+                len_price = len(i[2])
+            if len_count < len(i[3]):
+                len_count = len(i[3])
+            if len_summ < len(i[4]):
+                len_summ = len(i[4])
+
+        width_col = [
+            len_service,
+            len_position,
+            len_price,
+            len_count,
+            len_summ
+        ]
+
+        for row in rows:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 3)
+                ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+        in_total = self.__get_in_total(InTotal.objects.all())
+        rows = in_total
+
+        row_num += 1
+        ws.write_merge(row_num, row_num, 0, 2, "ВСЕГО", font_style)
+
+        for row in rows:
+            for col_num in range(len(row)):
+                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 6)
+                ws.write(row_num, col_num+3, str(row[col_num]), font_style)
 
         wb.save(response)
 
