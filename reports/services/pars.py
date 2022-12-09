@@ -266,3 +266,27 @@ class Pars:
             count = 0
         sales_by_positions_stat = SalesByPositionsStat.objects.all()
         sales_by_positions_stat = sales_by_positions_stat[0].delete()
+
+    def pars_sales_by_sno(self, trs, tag):
+        count = 0
+        sales_by_sno = SalesBySno.objects.all().delete()
+        for tr in trs:
+            cap = tr.find_all(tag)
+            sales_by_sno = SalesBySno()
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                if count == 0:
+                    sales_by_sno.code = caps
+                elif count == 1:
+                    sales_by_sno.caption = caps
+                elif count == 2:
+                    sales_by_sno.count = caps
+                elif count == 3:
+                    sales_by_sno.summ = caps
+                elif count == 4:
+                    sales_by_sno.discount = caps
+                count += 1
+            sales_by_sno.save()
+            count = 0
+        sales_by_sno = SalesBySno.objects.all()
+        sales_by_sno = sales_by_sno[0].delete()

@@ -852,5 +852,80 @@ class ReportXLS:
 
         return response
 
+    def __get_sales_by_sno(self, sales_by_sno):
+        return sales_by_sno.values_list(
+            'code',
+            'caption',
+            'count',
+            'summ',
+            'discount'
+        )
+
     def get_export_sales_by_sno(self):
-        pass
+        response = HttpResponse(content_type="applications/ms-excel")
+        date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+        response["Content-Disposition"] = "attachment; filename=SalesBySNO " + str(date) + ".xls"
+
+        wb = xlwt.Workbook(encoding="utf-8")
+        ws = wb.add_sheet("report")
+        row_num = 1
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
+
+        ws.write_merge(0, 0, 0, 5, "Продажи с разбивкой по СНО", font_title)
+
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
+
+        columns = [
+            "Код",
+            "Наименование",
+            "Кол-во",
+            "Сумма",
+            "Скидка",
+            "Всего"
+        ]
+
+        len_code = len(columns[0])
+        len_caption = len(columns[1])
+        len_count = len(columns[2])
+        len_summ = len(columns[3])
+        len_discount = len(columns[4])
+        len_all_s = len(columns[5])
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_zag)
+
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
+
+        sales_by_sno = self.__get_sales_by_sno(SalesBySno.objects.all())
+        rows = sales_by_sno
+
+        for i in sales_by_sno:
+            if len_code < len(i[0]):
+                len_code = len(i[0])
+            if len_caption < len(i[1]):
+                len_caption = len(i[1])
+            if len_count < len(i[2]):
+                len_count = len(i[2])
+            if len_summ < len(i[3]):
+                len_summ = len(i[3])
+            if len_discount < len(i[4]):
+                len_discount = len(i[4])
+
+        width_col = [
+            len_code,
+            len_caption,
+            len_count,
+            len_summ,
+            len_discount,
+            len_all_s
+        ]
+
+        for row in rows:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 3)
+                ws.write(row_num, col_num+1, str(row[col_num]), font_style)
+
+        wb.save(response)
+
+        return response

@@ -129,3 +129,11 @@ class SalesByPositionsStat(models.Model):
 class InTotal(models.Model):
     count = models.CharField(max_length=250, blank=True, null=True)
     summ = models.CharField(max_length=250, blank=True, null=True)
+
+
+class SalesBySno(models.Model):
+    code = models.CharField(max_length=250, blank=True, null=True)
+    caption = models.CharField(max_length=250, blank=True, null=True)
+    count = models.CharField(max_length=250, blank=True, null=True)
+    summ = models.CharField(max_length=250, blank=True, null=True)
+    discount = models.CharField(max_length=250, blank=True, null=True)

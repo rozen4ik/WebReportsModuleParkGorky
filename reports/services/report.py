@@ -638,9 +638,6 @@ class Report:
                 sales_by_positions_stat = SalesByPositionsStat.objects.all()
                 in_total = InTotal.objects.all()
 
-                for i in in_total:
-                    print(f"{i.count} - {i.summ}")
-
                 os.remove("result_scan_sales_by_positions_stat.html")
 
         data = {
@@ -661,9 +658,8 @@ class Report:
         end_d = "01.01.01"
         ticket_form = TicketSales(request.GET)
         fo = ""
-        # in_total = InTotal.objects.all().delete()
-        # pars = Pars()
-        # sales_by_positions_stat = SalesByPositionsStat.objects.all()
+        pars = Pars()
+        sales_by_sno = SalesBySno.objects.all().delete()
 
         if ticket_form.is_valid():
             filter_ticket = ticket_form.cleaned_data
@@ -695,10 +691,18 @@ class Report:
                 with open("result_scan_sales_by_sno.html") as fp:
                     soup = BeautifulSoup(fp, "lxml")
 
+                trs = soup.find_all('table')[1].find_all('tr')
+                pars.pars_sales_by_sno(trs, 'td')
+
+                os.remove("result_scan_sales_by_sno.html")
+
+                sales_by_sno = SalesBySno.objects.all()
+
         data = {
             "access": access,
             "fo": fo,
-            "ticket_form": ticket_form
+            "ticket_form": ticket_form,
+            "sales_by_sno": sales_by_sno
         }
 
         return data

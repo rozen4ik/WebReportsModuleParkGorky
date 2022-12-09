@@ -10,6 +10,8 @@
         <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
             <thead class="align-middle table-primary">
             <tr>
+                <th scope="col">Код</th>
+                <th scope="col">Наименование</th>
                 <th scope="col">Кол-во</th>
                 <th scope="col">Сумма</th>
                 <th scope="col">Скидка</th>
@@ -17,21 +19,14 @@
             </tr>
             </thead>
             <tbody class="table-group-divider">
-            {% for t in sales_by_positions_stat %}
+            {% for t in sales_by_sno %}
                 <tr class="align-middle">
-                    <td scope="row">{{ t.service }}</td>
-                    <td>{{ t.position }}</td>
-                    <td>{{ t.price }}</td>
+                    <td colspan="2">{{ t.code }}</td>
+                    <td>{{ t.caption }}</td>
                     <td>{{ t.count }}</td>
                     <td>{{ t.summ }}</td>
+                    <td>{{ t.discount }}</td>
                 </tr>
-            {% endfor %}
-            {% for i in in_total %}
-            <tr class="align-middle">
-                <td colspan="3"><b>ВСЕГО</b></td>
-                <td><b>{{ i.count }}</b></td>
-                <td><b>{{ i.summ }}</b></td>
-            </tr>
             {% endfor %}
             </tbody>
         </table>
