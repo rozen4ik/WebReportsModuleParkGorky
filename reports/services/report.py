@@ -654,4 +654,51 @@ class Report:
         return data
 
     def get_sales_by_sno(self, request):
-        pass
+        user = User.objects.all().select_related('profile')
+        access = self.get_access(request)
+        config = Conf.objects.get(id=1)
+        start_d = "01.01.01"
+        end_d = "01.01.01"
+        ticket_form = TicketSales(request.GET)
+        fo = ""
+        # in_total = InTotal.objects.all().delete()
+        # pars = Pars()
+        # sales_by_positions_stat = SalesByPositionsStat.objects.all()
+
+        if ticket_form.is_valid():
+            filter_ticket = ticket_form.cleaned_data
+            start_d = ticket_form.cleaned_data["start_date"]
+            end_d = ticket_form.cleaned_data["end_date"]
+
+            if filter_ticket != {'start_date': None, 'end_date': None}:
+                fo = "yes"
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "* "
+                    "from "
+                    f"HTML$SALES_BY_SNO('{start_d}', '{end_d}', null, null) "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                st = ""
+                for i in tables:
+                    st += f"{i[0]}"
+
+                st = st.replace("charset=windows-1251", "charset=utf-8")
+                with open('result_scan_sales_by_sno.html', 'w') as output_file:
+                    output_file.write(st)
+
+                with open("result_scan_sales_by_sno.html") as fp:
+                    soup = BeautifulSoup(fp, "lxml")
+
+        data = {
+            "access": access,
+            "fo": fo,
+            "ticket_form": ticket_form
+        }
+
+        return data
