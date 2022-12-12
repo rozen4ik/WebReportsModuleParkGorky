@@ -782,3 +782,64 @@ class Report:
         }
 
         return data
+
+    def get_ident_sales_by_tariff(self, request):
+        user = User.objects.all().select_related('profile')
+        access = self.get_access(request)
+        config = Conf.objects.get(id=1)
+        start_d = "01.01.01"
+        end_d = "01.01.01"
+        ticket_form = TicketSales(request.GET)
+        fo = ""
+        page_number = request.GET.get("page")
+        page_m = ""
+        pars = Pars()
+        ident_sales_by_tariff = IdentSalesByTariff.objects.all().delete()
+
+        if ticket_form.is_valid():
+            filter_ticket = ticket_form.cleaned_data
+            start_d = ticket_form.cleaned_data["start_date"]
+            end_d = ticket_form.cleaned_data["end_date"]
+
+            if filter_ticket != {'start_date': None, 'end_date': None}:
+                fo = "yes"
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "* "
+                    "from "
+                    f"HTML2$IDENT_SALES_BY_TARIFF('{start_d}', '{end_d}') "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                st = ""
+                for i in tables:
+                    st += f"{i[0]}"
+
+                st = st.replace("charset=windows-1251", "charset=utf-8")
+                with open('result_scan_ident_sales_by_tariff.html', 'w') as output_file:
+                    output_file.write(st)
+
+                with open("result_scan_ident_sales_by_tariff.html") as fp:
+                    soup = BeautifulSoup(fp, "lxml")
+
+                trs = soup.find_all('table')[1].find_all('tr')
+                pars.pars_ident_sales_by_tariff(trs, 'td', start_d)
+
+                os.remove("result_scan_ident_sales_by_tariff.html")
+
+                ident_sales_by_tariff = IdentSalesByTariff.objects.all()
+                page_model = Paginator(ident_sales_by_tariff, 18)
+                page_m = page_model.get_page(page_number)
+
+        data = {
+            "access": access,
+            "fo": fo,
+            "ticket_form": ticket_form,
+            "page_m": page_m
+        }
+
+        return data

@@ -148,3 +148,10 @@ class IdentSalesStat(models.Model):
     price = models.CharField(max_length=250, blank=True, null=True)
     count = models.CharField(max_length=250, blank=True, null=True)
     summ = models.CharField(max_length=250, blank=True, null=True)
+
+
+class IdentSalesByTariff(models.Model):
+    tariff = models.CharField(max_length=250, blank=True, null=True)
+    limit = models.CharField(max_length=250, blank=True, null=True)
+    used = models.CharField(max_length=250, blank=True, null=True)
+    remains = models.CharField(max_length=250, blank=True, null=True)

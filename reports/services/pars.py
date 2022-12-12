@@ -1,6 +1,8 @@
+import datetime
 import re
 from bs4 import BeautifulSoup
 from reports.models import *
+from datetime import timedelta
 
 
 class Pars:
@@ -310,3 +312,28 @@ class Pars:
             count = 0
         ident_sales_stat = IdentSalesStat.objects.all()
         ident_sales_stat = ident_sales_stat[0].delete()
+
+    def pars_ident_sales_by_tariff(self, trs, tag, date_cash):
+        day = timedelta(days=1)
+        count = 0
+        ident_sales_by_tariff = IdentSalesByTariff.objects.all().delete()
+        for tr in trs:
+            cap = tr.find_all(tag)
+            ident_sales_by_tariff = IdentSalesByTariff()
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                if count == 0:
+                    ident_sales_by_tariff.tariff = f"{date_cash} {caps}"
+                    if caps == "19:30":
+                        date_cash += day
+                elif count == 1:
+                    ident_sales_by_tariff.limit = caps
+                elif count == 2:
+                    ident_sales_by_tariff.used = caps
+                elif count == 3:
+                    ident_sales_by_tariff.remains = caps
+                count += 1
+            ident_sales_by_tariff.save()
+            count = 0
+        ident_sales_by_tariff = IdentSalesByTariff.objects.all()
+        ident_sales_by_tariff = ident_sales_by_tariff.filter(tariff=None).delete()

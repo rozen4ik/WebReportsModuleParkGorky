@@ -13,6 +13,7 @@ urlpatterns = [
     path('sales_by_positions_stat/', views.sales_by_positions_stat),
     path('sales_by_sno/', views.sales_by_sno),
     path('ident_sales_stat/', views.ident_sales_stat),
+    path('ident_sales_by_tariff/', views.ident_sales_by_tariff),
     path('export_stat_bill/', views.export_stat_bill, name='export-stat-bill'),
     path('export_passage/', views.export_passage, name='export-passage'),
     path('export_rule_list/', views.export_rule_list, name='export-rule-list'),
@@ -23,5 +24,6 @@ urlpatterns = [
     path('export_sales_by_positions_stat/', views.export_sales_by_positions_stat,
          name='export-sales-by-positions-stat'),
     path('export_sales_by_sno/', views.export_sales_by_sno, name='export-sales-by-sno'),
-    path('export_ident_sales_stat/', views.export_ident_sales_stat, name='export-ident-sales-stat')
+    path('export_ident_sales_stat/', views.export_ident_sales_stat, name='export-ident-sales-stat'),
+    path('export_ident_sales_by_tariff/', views.export_ident_sales_by_tariff, name='export-ident-sales-by-tariff')
 ]

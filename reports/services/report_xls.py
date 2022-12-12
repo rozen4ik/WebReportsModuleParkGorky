@@ -995,3 +995,72 @@ class ReportXLS:
         wb.save(response)
 
         return response
+
+    def __get_ident_sales_by_tariff(self, ident_sales_by_tariff):
+        return ident_sales_by_tariff.values_list(
+            'tariff',
+            'limit',
+            'used',
+            'remains'
+        )
+
+    def get_export_ident_sales_by_tariff(self):
+        response = HttpResponse(content_type="applications/ms-excel")
+        date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+        response["Content-Disposition"] = "attachment; filename=IdentSalesByTariff " + str(date) + ".xls"
+
+        wb = xlwt.Workbook(encoding="utf-8")
+        ws = wb.add_sheet("report")
+        row_num = 1
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
+
+        ws.write_merge(0, 0, 0, 3, "Количество проданных карт", font_title)
+
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
+
+        columns = [
+            "Тариф",
+            "Лимит",
+            "Использовано",
+            "Остаток"
+        ]
+
+        len_tariff = len(columns[0])
+        len_limit = len(columns[1])
+        len_used = len(columns[2])
+        len_remains = len(columns[3])
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_zag)
+
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
+
+        ident_sales_by_tariff = self.__get_ident_sales_by_tariff(IdentSalesByTariff.objects.all())
+        rows = ident_sales_by_tariff
+
+        for i in ident_sales_by_tariff:
+            if len_tariff < len(i[0]):
+                len_tariff = len(i[0])
+            if len_limit < len(i[1]):
+                len_limit = len(i[1])
+            if len_used < len(i[2]):
+                len_used = len(i[2])
+            if len_remains < len(i[3]):
+                len_remains = len(i[3])
+
+        width_col = [
+            len_tariff,
+            len_limit,
+            len_used,
+            len_remains
+        ]
+
+        for row in rows:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 3)
+                ws.write(row_num, col_num, str(row[col_num]), font_style)
+
+        wb.save(response)
+
+        return response

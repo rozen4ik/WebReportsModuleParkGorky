@@ -105,6 +105,15 @@ def ident_sales_stat(request):
     return render(request, "reports/result_ident_sales_stat.html", data)
 
 
+def ident_sales_by_tariff(request):
+    if request.user.is_authenticated:
+        report = Report()
+        data = report.get_ident_sales_by_tariff(request)
+    else:
+        data = {}
+    return render(request, "reports/result_ident_sales_by_tariff.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')
@@ -173,4 +182,10 @@ def export_sales_by_sno(request):
 def export_ident_sales_stat(request):
     report_xls = ReportXLS()
     response = report_xls.get_export_ident_sales_stat()
+    return response
+
+
+def export_ident_sales_by_tariff(request):
+    report_xls = ReportXLS()
+    response = report_xls.get_export_ident_sales_by_tariff()
     return response
