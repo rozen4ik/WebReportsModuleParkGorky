@@ -96,6 +96,15 @@ def sales_by_sno(request):
     return render(request, "reports/result_sales_by_sno.html", data)
 
 
+def ident_sales_stat(request):
+    if request.user.is_authenticated:
+        report = Report()
+        data = report.get_ident_sales_stat(request)
+    else:
+        data = {}
+    return render(request, "reports/result_ident_sales_stat.html", data)
+
+
 def get_access(request):
     if request.user.is_authenticated:
         user = User.objects.all().select_related('profile')
@@ -158,4 +167,10 @@ def export_sales_by_positions_stat(request):
 def export_sales_by_sno(request):
     report_xls = ReportXLS()
     response = report_xls.get_export_sales_by_sno()
+    return response
+
+
+def export_ident_sales_stat(request):
+    report_xls = ReportXLS()
+    response = report_xls.get_export_ident_sales_stat()
     return response

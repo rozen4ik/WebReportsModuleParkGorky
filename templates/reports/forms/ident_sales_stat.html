@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отчёт по продажам с разбивкой по категориям</title>
+    <title>Отчёт о продажах идентификаторов по тарифам</title>
     <link rel="stylesheet" href="{% static 'css/body.css' %}" type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
@@ -67,14 +67,18 @@
     <br>
     <form class="row g-3" method="get" action="">
         {% csrf_token %}
-        <h3>Укажите временной период</h3>
+        <h3>Укажите временной период и тариф</h3>
         <div class="col-md-3">
-            <label for="{{ ticket_form.start_date.id_for_label }}">Начало периода</label>
-            {{ ticket_form.start_date }}
+            <label for="{{ tariff_types_form.start_date.id_for_label }}">Начало периода</label>
+            {{ tariff_types_form.start_date }}
         </div>
         <div class="col-md-3">
-            <label for="{{ ticket_form.end_date.id_for_label }}">Конец периода</label>
-            {{ ticket_form.end_date }}
+            <label for="{{ tariff_types_form.end_date.id_for_label }}">Конец периода</label>
+            {{ tariff_types_form.end_date }}
+        </div>
+        <div class="col-md-3">
+            <label for="{{ tariff_types_form.end_date.id_for_label }}">Тариф</label>
+            {{ tariff_types_form.tariff_types }}
         </div>
         <div class="col-12">
             <input type="submit" name="sun" class="btn btn-outline-primary contact-form__button"
@@ -88,7 +92,7 @@
         <div id="cont" style="display: none">
     {% else %}
         <div id="cont">
-            {% block sales_by_cat %}
+            {% block ident_sales_stat %}
             {% endblock %}
         </div>
     {% endif %}

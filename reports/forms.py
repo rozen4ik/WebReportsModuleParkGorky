@@ -17,6 +17,14 @@ for i in i_t:
 
 ident_type_l = tuple(ident_type_l)
 
+tariff = TariffTypes.objects.all()
+tariff_l = []
+
+for i in tariff:
+    tariff_l.append((f"{i.name}", f"{i.name}"))
+
+tariff_l = tuple(tariff_l)
+
 
 class TicketSales(forms.Form):
     start_date = forms.DateField(
@@ -61,6 +69,38 @@ class IdentTypesForms(forms.Form):
             }
         ),
         choices=ident_type_l
+    )
+
+    start_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            attrs={
+                "class": "form-control datetimepicker-input",
+                "type": "date"
+            },
+        )
+    )
+
+    end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            attrs={
+                "class": "form-control datetimepicker-input",
+                "type": "date"
+            },
+        )
+    )
+
+
+class TariffTypesForms(forms.Form):
+    tariff_types = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": "form-select"
+            }
+        ),
+        choices=tariff_l
     )
 
     start_date = forms.DateField(

@@ -1,0 +1,34 @@
+{% extends 'reports/forms/ident_sales_stat.html' %}
+{% load static %}
+{% load spurl %}
+{% block ident_sales_stat %}
+    <div class="table-responsive">
+        <form method="POST">
+            <a class="btn btn-primary" href="{% url 'export-ident-sales-stat' %}" role="button">Скачать отчёт</a>
+            <p></p>
+        </form>
+        <h2 align="center">Отчёт о продажах идентификаторов по тарифам</h2>
+        <br>
+        <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
+            <thead class="align-middle table-primary">
+            <tr>
+                <th scope="col">Код</th>
+                <th scope="col">Наименование</th>
+                <th scope="col">Тариф</th>
+                <th scope="col">Цена</th>
+                <th scope="col">Кол-во</th>
+                <th scope="col">Сумма</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for t in ident_sales_stat %}
+                <tr class="align-middle">
+                    <td colspan="4">{{ t.price }}</td>
+                    <td>{{ t.count }}</td>
+                    <td>{{ t.summ }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

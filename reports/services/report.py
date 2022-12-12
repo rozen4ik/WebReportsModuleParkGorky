@@ -706,3 +706,79 @@ class Report:
         }
 
         return data
+
+    def get_ident_sales_stat(self, request):
+        user = User.objects.all().select_related('profile')
+        access = self.get_access(request)
+        config = Conf.objects.get(id=1)
+        start_d = "01.01.01"
+        end_d = "01.01.01"
+        fo = ""
+        pars = Pars()
+        tariff_types = TariffTypes.objects.all().delete()
+        ident_sales_stat = IdentSalesStat.objects.all().delete()
+        con = self.settings_firebird(config)
+        cur = con.cursor()
+
+        tariff_types_list = cur.execute(
+            "select "
+            "ID, NAME "
+            "from "
+            "TARIFF$TYPES "
+        ).fetchall()
+
+        con.commit()
+        con.close()
+
+        for i in tariff_types_list:
+            tariff_types = TariffTypes()
+            tariff_types.id_tt = i[0]
+            tariff_types.name = i[1]
+            tariff_types.save()
+
+        tariff_types_form = TariffTypesForms(request.GET)
+
+        if tariff_types_form.is_valid():
+            filter_ident = tariff_types_form.cleaned_data
+            start_d = tariff_types_form.cleaned_data["start_date"]
+            end_d = tariff_types_form.cleaned_data["end_date"]
+
+            if filter_ident != {'tariff_types': '', 'start_date': None, 'end_date': None}:
+                fo = "yes"
+                tariff_types = TariffTypes.objects.get(name=filter_ident["tariff_types"])
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                tables = cur.execute(
+                    "select "
+                    "* "
+                    "from "
+                    f"HTML$IDENT_SALES_STAT('{start_d}', '{end_d}', '{tariff_types.id_tt}') "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                st = ""
+                for i in tables:
+                    st += f"{i[0]}"
+
+                with open('result_scan_ident_sales_stat.html', 'w') as output_file:
+                    output_file.write(st)
+
+                with open("result_scan_ident_sales_stat.html") as fp:
+                    soup = BeautifulSoup(fp, "lxml")
+
+                trs = soup.find_all('table')[1].find_all('tr')
+                pars.pars_ident_sales_stat(trs, 'td')
+                ident_sales_stat = IdentSalesStat.objects.all()
+
+                os.remove("result_scan_ident_sales_stat.html")
+
+        data = {
+            "access": access,
+            "fo": fo,
+            "tariff_types_form": tariff_types_form,
+            "ident_sales_stat": ident_sales_stat
+        }
+
+        return data

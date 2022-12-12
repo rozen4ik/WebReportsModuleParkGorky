@@ -608,7 +608,7 @@ class ReportXLS:
         row_num = 1
         font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
 
-        ws.write_merge(0, 0, 0, 8, "Продажи индификаторов за период", font_title)
+        ws.write_merge(0, 0, 0, 8, "Продажи идентификаторов за период", font_title)
 
         font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
@@ -925,6 +925,72 @@ class ReportXLS:
             for col_num in range(len(row)):
                 ws.col(col_num).width = 256 * (int(width_col[col_num]) + 3)
                 ws.write(row_num, col_num+1, str(row[col_num]), font_style)
+
+        wb.save(response)
+
+        return response
+
+    def __get_ident_sales_stat(self, ident_sales_stat):
+        return ident_sales_stat.values_list(
+            'price',
+            'count',
+            'summ'
+        )
+
+    def get_export_ident_sales_stat(self):
+        response = HttpResponse(content_type="applications/ms-excel")
+        date = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+        response["Content-Disposition"] = "attachment; filename=IdentSalesStat " + str(date) + ".xls"
+
+        wb = xlwt.Workbook(encoding="utf-8")
+        ws = wb.add_sheet("report")
+        row_num = 1
+        font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
+
+        ws.write_merge(0, 0, 0, 5, "Продажи идентификаторов по тарифам", font_title)
+
+        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
+
+        columns = [
+            "Код",
+            "Наименование",
+            "Тариф",
+            "Цена",
+            "Кол-во",
+            "Сумма"
+        ]
+
+        len_price = len(columns[3])
+        len_count = len(columns[4])
+        len_summ = len(columns[5])
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num], font_zag)
+
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
+
+        ident_sales_stat = self.__get_ident_sales_stat(IdentSalesStat.objects.all())
+        rows = ident_sales_stat
+
+        for i in ident_sales_stat:
+            if len_price < len(i[0]):
+                len_price = len(i[0])
+            if len_count < len(i[1]):
+                len_count = len(i[1])
+            if len_summ < len(i[2]):
+                len_summ = len(i[2])
+
+        width_col = [
+            len_price,
+            len_count,
+            len_summ
+        ]
+
+        for row in rows:
+            row_num += 1
+            for col_num in range(len(row)):
+                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 12)
+                ws.write(row_num, col_num + 3, str(row[col_num]), font_style)
 
         wb.save(response)
 

@@ -137,3 +137,14 @@ class SalesBySno(models.Model):
     count = models.CharField(max_length=250, blank=True, null=True)
     summ = models.CharField(max_length=250, blank=True, null=True)
     discount = models.CharField(max_length=250, blank=True, null=True)
+
+
+class TariffTypes(models.Model):
+    id_tt = models.CharField(max_length=250, blank=True, null=True)
+    name = models.CharField(max_length=250, blank=True, null=True)
+
+
+class IdentSalesStat(models.Model):
+    price = models.CharField(max_length=250, blank=True, null=True)
+    count = models.CharField(max_length=250, blank=True, null=True)
+    summ = models.CharField(max_length=250, blank=True, null=True)
