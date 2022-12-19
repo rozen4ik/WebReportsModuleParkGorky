@@ -156,27 +156,36 @@ class Report:
         config = Conf.objects.get(id=1)
         page_number = request.GET.get("page")
         page_m = ""
-        ticket_form = TicketSales(request.GET)
+        tariff_form = TariffTimesForm(request.GET)
+        tariff_start = "00:00:00"
+        tariff_stop = "00:00:00"
         start_d = "01.01.01"
         end_d = "01.01.01"
         fo = ""
+        passage_park_gorky = PassageParkGorky.objects.all().delete()
         data = {}
 
-        if ticket_form.is_valid():
-            filter_ticket = ticket_form.cleaned_data
-            start_d = ticket_form.cleaned_data["start_date"]
-            end_d = ticket_form.cleaned_data["end_date"]
+        if tariff_form.is_valid():
+            filter_ticket = tariff_form.cleaned_data
+            start_d = tariff_form.cleaned_data["start_date"]
+            end_d = tariff_form.cleaned_data["end_date"]
+            tariff_start = tariff_form.cleaned_data["tariff_start"]
+            tariff_stop = tariff_form.cleaned_data["tariff_stop"]
 
-            if filter_ticket != {'start_date': None, 'end_date': None}:
+            if filter_ticket != {'tariff_start': '', 'tariff_stop': '', 'start_date': None, 'end_date': None}:
                 fo = "yes"
+                if tariff_start.find(":") != -1 or tariff_stop.find(":") != -1:
+                    start_d = f"{start_d} {tariff_start}:00"
+                    end_d = f"{end_d} {tariff_stop}:00"
+                    print(start_d)
                 con = self.settings_firebird(config)
                 cur = con.cursor()
                 tables = cur.execute(
                     "select "
-                    "RESOLUTION_TIMESTAMP, ID_POINT, ID_TER_FROM, ID_TER_TO, IDENTIFIER_VALUE "
+                    "MOTION_TIMESTAMP, ID_POINT, ID_TER_FROM, ID_TER_TO, IDENTIFIER_VALUE "
                     "from "
-                    "IDENT$RESOLUTIONS "
-                    f"where RESOLUTION_TIMESTAMP >= '{start_d}' and RESOLUTION_TIMESTAMP <= '{end_d}'"
+                    "IDENT$MOTIONS "
+                    f"where MOTION_TIMESTAMP >= '{start_d}' and MOTION_TIMESTAMP <= '{end_d}'"
                 ).fetchall()
 
                 passages_turnstile = PassagesTurnstile.objects.all().delete()
@@ -216,14 +225,21 @@ class Report:
                 con.close()
 
                 passages_turnstile = PassagesTurnstile.objects.all().order_by('resolution_timestamp')
-                page_model = Paginator(passages_turnstile, 20)
+                all_count_passage = len(passages_turnstile)
+                passage_park_gorky = PassageParkGorky()
+                passage_park_gorky.name_territory = "По всем площадкам"
+                passage_park_gorky.count = all_count_passage
+                passage_park_gorky.save()
+                passage_park_gorky = PassageParkGorky.objects.all()
+                page_model = Paginator(passages_turnstile, 50)
                 page_m = page_model.get_page(page_number)
 
             data = {
                 "access": access,
                 "page_m": page_m,
                 "fo": fo,
-                "ticket_form": ticket_form,
+                "tariff_form": tariff_form,
+                "passage_park_gorky": passage_park_gorky
             }
         else:
             data = {}

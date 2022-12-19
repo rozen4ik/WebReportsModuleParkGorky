@@ -122,3 +122,45 @@ class TariffTypesForms(forms.Form):
             },
         )
     )
+
+
+class TariffTimesForm(forms.Form):
+    tariff_start = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": "form-select"
+            }
+        ),
+        choices=tariff_l
+    )
+
+    tariff_stop = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": "form-select"
+            }
+        ),
+        choices=tariff_l
+    )
+
+    start_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            attrs={
+                "class": "form-control datetimepicker-input",
+                "type": "date"
+            },
+        )
+    )
+
+    end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            attrs={
+                "class": "form-control datetimepicker-input",
+                "type": "date"
+            },
+        )
+    )

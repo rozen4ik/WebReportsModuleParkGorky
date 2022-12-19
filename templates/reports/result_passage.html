@@ -7,6 +7,9 @@
             <a class="btn btn-primary" href="{% url 'export-passage' %}" role="button">Скачать отчёт</a>
             <p></p>
         </form>
+        {% for ter in passage_park_gorky %}
+            <p>{{ ter.name_territory }} - {{ ter.count }} чел.</p>
+        {% endfor %}
         <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
             <thead class="align-middle table-primary">
             <tr>

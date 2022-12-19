@@ -31,16 +31,23 @@
                                 <a class="dropdown-item dropdown-toggle" href="#" id="multilevelDropdownMenu1"
                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Продажи</a>
                                 <ul class="dropdown-menu" aria-labelledby="multilevelDropdownMenu1">
-                                    <li><a class="dropdown-item" href="/ticket_sales/">Статистика продаж по местам</a></li>
+                                    <li><a class="dropdown-item" href="/ticket_sales/">Статистика продаж по местам</a>
+                                    </li>
                                     <li><a class="dropdown-item" href="/rule_list/">Правила пользования</a></li>
                                     <li><a class="dropdown-item" href="/service_list/">Услуги</a></li>
                                     <li><a class="dropdown-item" href="/desk_shift/">Отчёт о смене кассы</a></li>
-                                    <li><a class="dropdown-item" href="/sale_ident/">Продажи идентификаторов за период</a></li>
-                                    <li><a class="dropdown-item" href="/sales_by_cat/">Продажи с разбивкой по категориям</a></li>
-                                    <li><a class="dropdown-item" href="/sales_by_positions_stat/">Продажи в разбивке по позициям в чеке</a></li>
-                                    <li><a class="dropdown-item" href="/sales_by_sno/">Продажи с разбивкой по СНО</a></li>
-                                    <li><a class="dropdown-item" href="/ident_sales_stat/">Продажи идентификаторов по тарифам</a></li>
-                                    <li><a class="dropdown-item" href="/ident_sales_by_tariff/">Количество проданных карт</a></li>
+                                    <li><a class="dropdown-item" href="/sale_ident/">Продажи идентификаторов за
+                                        период</a></li>
+                                    <li><a class="dropdown-item" href="/sales_by_cat/">Продажи с разбивкой по
+                                        категориям</a></li>
+                                    <li><a class="dropdown-item" href="/sales_by_positions_stat/">Продажи в разбивке по
+                                        позициям в чеке</a></li>
+                                    <li><a class="dropdown-item" href="/sales_by_sno/">Продажи с разбивкой по СНО</a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="/ident_sales_stat/">Продажи идентификаторов по
+                                        тарифам</a></li>
+                                    <li><a class="dropdown-item" href="/ident_sales_by_tariff/">Количество проданных
+                                        карт</a></li>
                                 </ul>
                             </li>
                             <li class="dropdown dropend">
@@ -65,17 +72,25 @@
     </nav>
     <br>
     <div class="container back">
-        <br>
-        <form class="row g-3" method="get" action="">
+    <br>
+    <form class="row g-3" method="get" action="">
         {% csrf_token %}
         <h3>Укажите временной период</h3>
         <div class="col-md-3">
-            <label for="{{ ticket_form.start_date.id_for_label }}">Начало периода</label>
-            {{ ticket_form.start_date }}
+            <label for="{{ tariff_form.start_date.id_for_label }}">Начало периода</label>
+            {{ tariff_form.start_date }}
         </div>
         <div class="col-md-3">
-            <label for="{{ ticket_form.end_date.id_for_label }}">Конец периода</label>
-            {{ ticket_form.end_date }}
+            <label for="{{ tariff_form.end_date.id_for_label }}">Конец периода</label>
+            {{ tariff_form.end_date }}
+        </div>
+        <div class="col-md-3">
+            <label for="{{ tariff_form.tariff_start.id_for_label }}">Начало периода</label>
+            {{ tariff_form.tariff_start }}
+        </div>
+        <div class="col-md-3">
+            <label for="{{ tariff_form.tariff_stop.id_for_label }}">Конец периода</label>
+            {{ tariff_form.tariff_stop }}
         </div>
         <div class="col-12">
             <input type="submit" name="sun" class="btn btn-outline-primary contact-form__button"
@@ -93,7 +108,7 @@
             {% endblock %}
         </div>
     {% endif %}
-    </div>
+</div>
 {% else %}
     <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">

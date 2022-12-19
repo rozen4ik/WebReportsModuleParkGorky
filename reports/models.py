@@ -155,3 +155,8 @@ class IdentSalesByTariff(models.Model):
     limit = models.CharField(max_length=250, blank=True, null=True)
     used = models.CharField(max_length=250, blank=True, null=True)
     remains = models.CharField(max_length=250, blank=True, null=True)
+
+
+class PassageParkGorky(models.Model):
+    name_territory = models.CharField(max_length=250, blank=True, null=True)
+    count = models.CharField(max_length=250, blank=True, null=True)
