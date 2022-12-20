@@ -8,15 +8,13 @@
             <p></p>
         </form>
         {% for ter in passage_park_gorky %}
-            <p>{{ ter.name_territory }} - {{ ter.count }} чел.</p>
+            <h4>{{ ter.name_territory }} - {{ ter.count }} чел.</h4>
         {% endfor %}
         <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
             <thead class="align-middle table-primary">
             <tr>
                 <th scope="col">Дата прохода</th>
                 <th scope="col">Устройство</th>
-                <th scope="col">Откуда</th>
-                <th scope="col">Куда</th>
                 <th scope="col">Индификатор</th>
             </tr>
             </thead>
@@ -25,8 +23,6 @@
                 <tr class="align-middle">
                     <td scope="row">{{ t.resolution_timestamp }}</td>
                     <td>{{ t.id_point }}</td>
-                    <td>{{ t.id_ter_from }}</td>
-                    <td>{{ t.id_ter_to }}</td>
                     <td>{{ t.identifier_value }}</td>
                 </tr>
             {% endfor %}

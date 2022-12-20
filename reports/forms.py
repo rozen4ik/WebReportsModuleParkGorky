@@ -125,24 +125,24 @@ class TariffTypesForms(forms.Form):
 
 
 class TariffTimesForm(forms.Form):
-    tariff_start = forms.ChoiceField(
+    tariff_start = forms.TimeField(
         required=False,
-        widget=forms.Select(
+        widget=forms.TimeInput(
             attrs={
-                "class": "form-select"
+                "class": "form-control timepicker-input",
+                "type": "time"
             }
-        ),
-        choices=tariff_l
+        )
     )
 
-    tariff_stop = forms.ChoiceField(
+    tariff_stop = forms.TimeField(
         required=False,
-        widget=forms.Select(
+        widget=forms.TimeInput(
             attrs={
-                "class": "form-select"
+                "class": "form-control timepicker-input",
+                "type": "time"
             }
-        ),
-        choices=tariff_l
+        )
     )
 
     start_date = forms.DateField(

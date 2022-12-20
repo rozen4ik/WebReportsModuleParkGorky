@@ -20,8 +20,6 @@ class Baloon(models.Model):
 class PassagesTurnstile(models.Model):
     resolution_timestamp = models.CharField(max_length=250, blank=True, null=True)
     id_point = models.CharField(max_length=250, blank=True, null=True)
-    id_ter_from = models.CharField(max_length=250, blank=True, null=True)
-    id_ter_to = models.CharField(max_length=250, blank=True, null=True)
     identifier_value = models.CharField(max_length=250, blank=True, null=True)
 
 

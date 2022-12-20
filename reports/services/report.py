@@ -154,6 +154,7 @@ class Report:
     def get_passages_through_turnstiles(self, request):
         access = self.get_access(request)
         config = Conf.objects.get(id=1)
+        pars = Pars()
         page_number = request.GET.get("page")
         page_m = ""
         tariff_form = TariffTimesForm(request.GET)
@@ -161,6 +162,14 @@ class Report:
         tariff_stop = "00:00:00"
         start_d = "01.01.01"
         end_d = "01.01.01"
+        pav_a = 0
+        pav_b = 0
+        pav_2 = 0
+        pav_3 = 0
+        pav_4 = 0
+        pav_baby = 0
+        pav_hockey = 0
+        list_ident = []
         fo = ""
         passage_park_gorky = PassageParkGorky.objects.all().delete()
         data = {}
@@ -172,18 +181,15 @@ class Report:
             tariff_start = tariff_form.cleaned_data["tariff_start"]
             tariff_stop = tariff_form.cleaned_data["tariff_stop"]
 
-            if filter_ticket != {'tariff_start': '', 'tariff_stop': '', 'start_date': None, 'end_date': None}:
+            if filter_ticket != {'tariff_start': None, 'tariff_stop': None, 'start_date': None, 'end_date': None}:
                 fo = "yes"
-                if tariff_start.find(":") != -1 or tariff_stop.find(":") != -1:
-                    start_d = f"{start_d} {tariff_start}:00"
-                    end_d = f"{end_d} {tariff_stop}:00"
-                    print(start_d)
-                    print(end_d)
+                start_d = f"{start_d} {tariff_start}"
+                end_d = f"{end_d} {tariff_stop}"
                 con = self.settings_firebird(config)
                 cur = con.cursor()
                 tables = cur.execute(
                     "select "
-                    "MOTION_TIMESTAMP, ID_POINT, ID_TER_FROM, ID_TER_TO, IDENTIFIER_VALUE "
+                    "MOTION_TIMESTAMP, ID_POINT, IDENTIFIER_VALUE "
                     "from "
                     "IDENT$MOTIONS "
                     f"where MOTION_TIMESTAMP >= '{start_d}' and MOTION_TIMESTAMP <= '{end_d}'"
@@ -195,42 +201,93 @@ class Report:
                     passages_turnstile = PassagesTurnstile()
                     dt = i[0].strftime("%d.%m.%Y %H:%M")
                     passages_turnstile.resolution_timestamp = dt
-                    # point = cur.execute(
-                    #     "select "
-                    #     "ID, POINT_TYPE "
-                    #     "from "
-                    #     "DEV$POINTS "
-                    #     f"where ID = '{i[1]}'"
-                    # ).fetchall()
                     passages_turnstile.id_point = i[1]
-                    # ter_from = cur.execute(
-                    #     "select "
-                    #     "ID, CAPTION "
-                    #     "from "
-                    #     "DEV$TERRITORIES "
-                    #     f"where ID = '{i[2]}'"
-                    # ).fetchall()
-                    passages_turnstile.id_ter_from = i[2]
-                    # ter_to = cur.execute(
-                    #     "select "
-                    #     "ID, CAPTION "
-                    #     "from "
-                    #     "DEV$TERRITORIES "
-                    #     f"where ID = '{i[3]}'"
-                    # ).fetchall()
-                    passages_turnstile.id_ter_to = i[3]
-                    passages_turnstile.identifier_value = i[4]
+                    passages_turnstile.identifier_value = i[2]
                     passages_turnstile.save()
 
                 con.commit()
                 con.close()
 
                 passages_turnstile = PassagesTurnstile.objects.all().order_by('resolution_timestamp')
-                all_count_passage = len(passages_turnstile)
-                passage_park_gorky = PassageParkGorky()
-                passage_park_gorky.name_territory = "По всем площадкам"
-                passage_park_gorky.count = all_count_passage
-                passage_park_gorky.save()
+
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+                dg_cur = con.cursor()
+                for pas in passages_turnstile:
+                    tables = cur.execute(
+                        "select "
+                        "* "
+                        "from "
+                        "DEV$GROUP_ITEMS "
+                        f"where ID_POINT = '{pas.id_point}' "
+                    ).fetchall()
+                    for t in tables:
+                        dg = dg_cur.execute(
+                            "select "
+                            "ID, CAPTION "
+                            "from "
+                            "DEV$GROUPS "
+                            f"where ID = '{t[1]}'"
+                        ).fetchall()
+                        for d in dg:
+                            if (d[1] == "П1А Входы") or (d[1] == "П1А Входы Льготные"):
+                                list_ident.append(pas.identifier_value)
+                                pav_a += 1
+                            elif (d[1] == "П1Б Входы") or (d[1] == "П1Б Входы Льготные"):
+                                list_ident.append(pas.identifier_value)
+                                pav_b += 1
+                            elif d[1] == "П2 Входы":
+                                list_ident.append(pas.identifier_value)
+                                pav_2 += 1
+                            elif (d[1] == "П3 Входы") or (d[1] == "П3 Входы Льготные"):
+                                list_ident.append(pas.identifier_value)
+                                pav_3 += 1
+                            elif d[1] == "П4(VIP) Входы":
+                                list_ident.append(pas.identifier_value)
+                                pav_4 += 1
+                            elif d[1] == "П5 Входы":
+                                list_ident.append(pas.identifier_value)
+                                pav_baby += 1
+                            elif d[1] == "Хоккей входы":
+                                list_ident.append(pas.identifier_value)
+                                pav_hockey += 1
+
+                for i in list_ident:
+                    tables = cur.execute(
+                        "select "
+                        "* "
+                        "from "
+                        f"HTML$IDENT_INFO('{i}') "
+                    ).fetchall()
+                    st = ""
+                    for i in tables:
+                        st += f"{i[0]}"
+
+                    st = st.replace("charset=windows-1251", "charset=utf-8")
+                    with open('result_scan_ident_info.html', 'w') as output_file:
+                        output_file.write(st)
+
+                    with open("result_scan_ident_info.html") as fp:
+                        soup = BeautifulSoup(fp, "lxml")
+
+                    trs = soup.find_all('table')[2].find_all('tr')
+
+                    pars.pars_ticket(trs, 'td')
+
+                con.commit()
+                con.close()
+
+                print(len(list_ident))
+
+                all_count = pav_a + pav_b + pav_2 + pav_3 + pav_4 + pav_baby + pav_hockey
+                pars.pars_count_pav("По всем площадкам", all_count)
+                pars.pars_count_pav("ПАВ.1А", pav_a)
+                pars.pars_count_pav("ПАВ.1Б", pav_b)
+                pars.pars_count_pav("ПАВ.2", pav_2)
+                pars.pars_count_pav("ПАВ.3", pav_3)
+                pars.pars_count_pav("ПАВ.4", pav_4)
+                pars.pars_count_pav("Детский каток", pav_baby)
+                pars.pars_count_pav("Хоккейная площадка", pav_hockey)
                 passage_park_gorky = PassageParkGorky.objects.all()
                 page_model = Paginator(passages_turnstile, 50)
                 page_m = page_model.get_page(page_number)
@@ -283,7 +340,7 @@ class Report:
 
         rule_use = RuleList.objects.all()
 
-        page_model = Paginator(rule_use, 20)
+        page_model = Paginator(rule_use, 100)
         page_m = page_model.get_page(page_number)
 
         data = {

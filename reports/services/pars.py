@@ -337,3 +337,28 @@ class Pars:
             count = 0
         ident_sales_by_tariff = IdentSalesByTariff.objects.all()
         ident_sales_by_tariff = ident_sales_by_tariff.filter(tariff=None).delete()
+
+    def pars_count_pav(self, name_territory, count):
+        passage_park_gorky = PassageParkGorky()
+        passage_park_gorky.name_territory = name_territory
+        passage_park_gorky.count = count
+        passage_park_gorky.save()
+
+
+    def pars_ident_info(self, trs, tag):
+        count = 0
+        for tr in trs:
+            cap = tr.find_all(tag)
+            for i in cap:
+                caps = i.text.replace('\n', '')
+                print(caps)
+                if count == 0:
+                    pass
+                elif count == 1:
+                    pass
+                elif count == 2:
+                    pass
+                elif count == 3:
+                    pass
+                count += 1
+            count = 0

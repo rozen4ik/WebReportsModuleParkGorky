@@ -77,19 +77,19 @@
         {% csrf_token %}
         <h3>Укажите временной период</h3>
         <div class="col-md-3">
-            <label for="{{ tariff_form.start_date.id_for_label }}">Начало периода</label>
+            <label for="{{ tariff_form.start_date.id_for_label }}">Начало периода Даты</label>
             {{ tariff_form.start_date }}
         </div>
         <div class="col-md-3">
-            <label for="{{ tariff_form.end_date.id_for_label }}">Конец периода</label>
-            {{ tariff_form.end_date }}
-        </div>
-        <div class="col-md-3">
-            <label for="{{ tariff_form.tariff_start.id_for_label }}">Начало периода</label>
+            <label for="{{ tariff_form.tariff_start.id_for_label }}">Начало периода Времени</label>
             {{ tariff_form.tariff_start }}
         </div>
         <div class="col-md-3">
-            <label for="{{ tariff_form.tariff_stop.id_for_label }}">Конец периода</label>
+            <label for="{{ tariff_form.end_date.id_for_label }}">Конец периода Даты</label>
+            {{ tariff_form.end_date }}
+        </div>
+        <div class="col-md-3">
+            <label for="{{ tariff_form.tariff_stop.id_for_label }}">Конец периода Времени</label>
             {{ tariff_form.tariff_stop }}
         </div>
         <div class="col-12">
