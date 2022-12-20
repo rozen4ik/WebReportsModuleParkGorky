@@ -178,6 +178,7 @@ class Report:
                     start_d = f"{start_d} {tariff_start}:00"
                     end_d = f"{end_d} {tariff_stop}:00"
                     print(start_d)
+                    print(end_d)
                 con = self.settings_firebird(config)
                 cur = con.cursor()
                 tables = cur.execute(
@@ -194,30 +195,30 @@ class Report:
                     passages_turnstile = PassagesTurnstile()
                     dt = i[0].strftime("%d.%m.%Y %H:%M")
                     passages_turnstile.resolution_timestamp = dt
-                    point = cur.execute(
-                        "select "
-                        "ID, POINT_TYPE "
-                        "from "
-                        "DEV$POINTS "
-                        f"where ID = '{i[1]}'"
-                    ).fetchall()
-                    passages_turnstile.id_point = point[0][1]
-                    ter_from = cur.execute(
-                        "select "
-                        "ID, CAPTION "
-                        "from "
-                        "DEV$TERRITORIES "
-                        f"where ID = '{i[2]}'"
-                    ).fetchall()
-                    passages_turnstile.id_ter_from = ter_from[0][1]
-                    ter_to = cur.execute(
-                        "select "
-                        "ID, CAPTION "
-                        "from "
-                        "DEV$TERRITORIES "
-                        f"where ID = '{i[3]}'"
-                    ).fetchall()
-                    passages_turnstile.id_ter_to = ter_to[0][1]
+                    # point = cur.execute(
+                    #     "select "
+                    #     "ID, POINT_TYPE "
+                    #     "from "
+                    #     "DEV$POINTS "
+                    #     f"where ID = '{i[1]}'"
+                    # ).fetchall()
+                    passages_turnstile.id_point = i[1]
+                    # ter_from = cur.execute(
+                    #     "select "
+                    #     "ID, CAPTION "
+                    #     "from "
+                    #     "DEV$TERRITORIES "
+                    #     f"where ID = '{i[2]}'"
+                    # ).fetchall()
+                    passages_turnstile.id_ter_from = i[2]
+                    # ter_to = cur.execute(
+                    #     "select "
+                    #     "ID, CAPTION "
+                    #     "from "
+                    #     "DEV$TERRITORIES "
+                    #     f"where ID = '{i[3]}'"
+                    # ).fetchall()
+                    passages_turnstile.id_ter_to = i[3]
                     passages_turnstile.identifier_value = i[4]
                     passages_turnstile.save()
 
