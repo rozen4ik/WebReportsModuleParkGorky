@@ -169,7 +169,9 @@ class Report:
         pav_4 = 0
         pav_baby = 0
         pav_hockey = 0
+        full_price = 0
         list_ident = []
+        list_rule_use = []
         fo = ""
         passage_park_gorky = PassageParkGorky.objects.all().delete()
         data = {}
@@ -194,6 +196,8 @@ class Report:
                     "IDENT$MOTIONS "
                     f"where MOTION_TIMESTAMP >= '{start_d}' and MOTION_TIMESTAMP <= '{end_d}'"
                 ).fetchall()
+
+                print(f"Запрос в таблицу IDENT$MOTIONS")
 
                 passages_turnstile = PassagesTurnstile.objects.all().delete()
 
@@ -221,6 +225,7 @@ class Report:
                         "DEV$GROUP_ITEMS "
                         f"where ID_POINT = '{pas.id_point}' "
                     ).fetchall()
+                    print("Запрос в таблицу DEV$GROUP_ITEMS")
                     for t in tables:
                         dg = dg_cur.execute(
                             "select "
@@ -229,6 +234,7 @@ class Report:
                             "DEV$GROUPS "
                             f"where ID = '{t[1]}'"
                         ).fetchall()
+                        print(f"Запрос в таблицу DEV$GROUPS")
                         for d in dg:
                             if (d[1] == "П1А Входы") or (d[1] == "П1А Входы Льготные"):
                                 list_ident.append(pas.identifier_value)
@@ -252,13 +258,20 @@ class Report:
                                 list_ident.append(pas.identifier_value)
                                 pav_hockey += 1
 
+                con.commit()
+                con.close()
+
                 for i in list_ident:
+                    con = self.settings_firebird(config)
+                    cur = con.cursor()
                     tables = cur.execute(
                         "select "
                         "* "
                         "from "
                         f"HTML$IDENT_INFO('{i}') "
                     ).fetchall()
+
+                    print(f"Запрос в таблицу HTML$IDENT_INFO")
                     st = ""
                     for i in tables:
                         st += f"{i[0]}"
@@ -271,16 +284,25 @@ class Report:
                         soup = BeautifulSoup(fp, "lxml")
 
                     trs = soup.find_all('table')[2].find_all('tr')
+                    list_rule_use.append(trs[3].find('td').text.replace('\n', ''))
 
-                    pars.pars_ticket(trs, 'td')
+                    os.remove("result_scan_ident_info.html")
 
-                con.commit()
-                con.close()
+                    con.commit()
+                    con.close()
 
                 print(len(list_ident))
+                for i in list_rule_use:
+                    if (i == "Входной билет") or (i == "Входной билет Павильон 1А") or \
+                            (i == "Входной билет Павильон 1Б") or (i == "Входной билет Павильон 2") or \
+                            (i == "Входной билет Павильон 3") or (i == "Входной билет Павильон 4") or \
+                            (i == "Входной билет Павильон 5"):
+                        full_price += 1
 
                 all_count = pav_a + pav_b + pav_2 + pav_3 + pav_4 + pav_baby + pav_hockey
+                kat = pav_a + pav_b + pav_2 + pav_3 + pav_4
                 pars.pars_count_pav("По всем площадкам", all_count)
+                pars.pars_count_pav("Каток культуры и отдыха", kat)
                 pars.pars_count_pav("ПАВ.1А", pav_a)
                 pars.pars_count_pav("ПАВ.1Б", pav_b)
                 pars.pars_count_pav("ПАВ.2", pav_2)
@@ -288,6 +310,8 @@ class Report:
                 pars.pars_count_pav("ПАВ.4", pav_4)
                 pars.pars_count_pav("Детский каток", pav_baby)
                 pars.pars_count_pav("Хоккейная площадка", pav_hockey)
+                pars.pars_count_pav("Из них", "")
+                pars.pars_count_pav("Полная стоимость", full_price)
                 passage_park_gorky = PassageParkGorky.objects.all()
                 page_model = Paginator(passages_turnstile, 50)
                 page_m = page_model.get_page(page_number)

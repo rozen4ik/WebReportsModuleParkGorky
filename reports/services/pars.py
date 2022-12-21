@@ -345,20 +345,9 @@ class Pars:
         passage_park_gorky.save()
 
 
-    def pars_ident_info(self, trs, tag):
+    def pars_get_ident_info(self, trs, tag):
         count = 0
-        for tr in trs:
-            cap = tr.find_all(tag)
-            for i in cap:
-                caps = i.text.replace('\n', '')
-                print(caps)
-                if count == 0:
-                    pass
-                elif count == 1:
-                    pass
-                elif count == 2:
-                    pass
-                elif count == 3:
-                    pass
-                count += 1
-            count = 0
+        print(trs[3].find(tag).text.replace('\n', ''))
+        print("---------")
+
+        return trs[3].find(tag).text.replace('\n', '')
