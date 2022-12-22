@@ -14,7 +14,7 @@
 </head>
 <body>
 {% if user.is_authenticated %}
-    <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
+   <nav class="navbar navbar-fixed-top-top navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <div class="navbar-collapse" id="navbarScroll">
                 <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}" role="button">Выйти
@@ -24,42 +24,44 @@
                         <a class="nav-link active" aria-current="page" href="/">Главная</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
-                           aria-expanded="false">Отчёты</a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                            <li class="dropdown dropend">
-                                <a class="dropdown-item dropdown-toggle" href="#" id="multilevelDropdownMenu1"
-                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Продажи</a>
-                                <ul class="dropdown-menu" aria-labelledby="multilevelDropdownMenu1">
-                                    <li><a class="dropdown-item" href="/ticket_sales/">Статистика продаж по местам</a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="/rule_list/">Правила пользования</a></li>
-                                    <li><a class="dropdown-item" href="/service_list/">Услуги</a></li>
-                                    <li><a class="dropdown-item" href="/desk_shift/">Отчёт о смене кассы</a></li>
-                                    <li><a class="dropdown-item" href="/sale_ident/">Продажи идентификаторов за
-                                        период</a></li>
-                                    <li><a class="dropdown-item" href="/sales_by_cat/">Продажи с разбивкой по
-                                        категориям</a></li>
-                                    <li><a class="dropdown-item" href="/sales_by_positions_stat/">Продажи в разбивке по
-                                        позициям в чеке</a></li>
-                                    <li><a class="dropdown-item" href="/sales_by_sno/">Продажи с разбивкой по СНО</a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="/ident_sales_stat/">Продажи идентификаторов по
-                                        тарифам</a></li>
-                                    <li><a class="dropdown-item" href="/ident_sales_by_tariff/">Количество проданных
-                                        карт</a></li>
-                                </ul>
-                            </li>
-                            <li class="dropdown dropend">
-                                <a class="dropdown-item dropdown-toggle" href="#" id="multilevelDropdownMenu1"
-                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Проходы</a>
-                                <ul class="dropdown-menu" aria-labelledby="multilevelDropdownMenu1">
-                                    <li><a class="dropdown-item" href="/passages_through_turnstiles/">Через
-                                        турникеты</a></li>
-                                </ul>
-                            </li>
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            Отчёты
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/passages_through_turnstiles/">Проходы</a></li>
                         </ul>
                     </li>
+{#                    <li class="nav-item dropdown">#}
+{#                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"#}
+{#                           aria-expanded="false">Отчёты</a>#}
+{#                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">#}
+                            {#                            <li class="dropdown dropend">#}
+                            {#                                <a class="dropdown-item dropdown-toggle" href="#" id="multilevelDropdownMenu1"#}
+                            {#                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Продажи</a>#}
+                            {#                                <ul class="dropdown-menu" aria-labelledby="multilevelDropdownMenu1">#}
+                            {#                                    <li><a class="dropdown-item" href="/ticket_sales/">Статистика продаж по местам</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/rule_list/">Правила пользования</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/service_list/">Услуги</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/desk_shift/">Отчёт о смене кассы</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/sale_ident/">Продажи идентификаторов за период</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/sales_by_cat/">Продажи с разбивкой по категориям</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/sales_by_positions_stat/">Продажи в разбивке по позициям в чеке</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/sales_by_sno/">Продажи с разбивкой по СНО</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/ident_sales_stat/">Продажи идентификаторов по тарифам</a></li>#}
+                            {#                                    <li><a class="dropdown-item" href="/ident_sales_by_tariff/">Количество проданных карт</a></li>#}
+                            {#                                </ul>#}
+                            {#                            </li>#}
+{#                            <li class="dropdown dropend">#}
+{#                                <a class="dropdown-item dropdown-toggle" href="#" id="multilevelDropdownMenu1"#}
+{#                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Проходы</a>#}
+{#                                <ul class="dropdown-menu" aria-labelledby="multilevelDropdownMenu1">#}
+{#                                    <li><a class="dropdown-item" href="/passages_through_turnstiles/">Через#}
+{#                                        турникеты</a></li>#}
+{#                                </ul>#}
+{#                            </li>#}
+{#                        </ul>#}
+{#                    </li>#}
                     {% if access == "yes" %}
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page"

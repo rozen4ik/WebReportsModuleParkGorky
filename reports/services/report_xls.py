@@ -103,11 +103,8 @@ class ReportXLS:
 
     def __get_passage(self, passages_turnstile):
         return passages_turnstile.values_list(
-            'resolution_timestamp',
-            'id_point',
-            'id_ter_from',
-            'id_ter_to',
-            'identifier_value',
+            'name_territory',
+            'count',
         )
 
     def get_export_passage(self):
@@ -116,61 +113,29 @@ class ReportXLS:
         response["Content-Disposition"] = "attachment; filename=Passage " + str(date) + ".xls"
 
         wb = xlwt.Workbook(encoding="utf-8")
-        ws = wb.add_sheet("report")
+        ws = wb.add_sheet("report", cell_overwrite_ok=True)
         row_num = 1
         font_title = self.__settings_font("Times New Roman", 20 * 14, True, "yes", "yes")
 
-        ws.write_merge(0, 0, 0, 4, "Отчёт по проходам через турникеты", font_title)
+        title = TitlePassageParkGorky.objects.all()[0].title
 
-        font_zag = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
+        ws.write_merge(0, 0, 0, 1, title, font_title)
 
-        columns = [
-            "Дата прохода",
-            "Устройство",
-            "Откуда",
-            "Куда",
-            "Индификатор"
-        ]
+        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "yes", "no")
 
-        len_resolution_timestamp = len(columns[0])
-        len_id_point = len(columns[1])
-        len_id_ter_from = len(columns[2])
-        len_id_ter_to = len(columns[3])
-        len_identifier_value = len(columns[4])
-
-        for col_num in range(len(columns)):
-            ws.write(row_num, col_num, columns[col_num], font_zag)
-
-        font_style = self.__settings_font("Times New Roman", 20 * 12, False, "no", "no")
-
-        passages_turnstiles = self.__get_passage(PassagesTurnstile.objects.all().order_by('resolution_timestamp'))
+        passages_turnstiles = self.__get_passage(PassageParkGorky.objects.all())
         rows = passages_turnstiles
-
-        for i in passages_turnstiles:
-            if len_resolution_timestamp < len(i[0]):
-                len_resolution_timestamp = len(i[0])
-            if len_id_point < len(i[1]):
-                len_id_point = len(i[1])
-            if len_id_ter_from < len(i[2]):
-                len_id_ter_from = len(i[2])
-            if len_id_ter_to < len(i[3]):
-                len_id_ter_to = len(i[3])
-            if len_identifier_value < len(i[4]):
-                len_identifier_value = len(i[4])
-
-        width_col = [
-            len_resolution_timestamp,
-            len_id_point,
-            len_id_ter_to,
-            len_id_ter_from,
-            len_identifier_value
-        ]
 
         for row in rows:
             row_num += 1
             for col_num in range(len(row)):
-                ws.col(col_num).width = 256 * (int(width_col[col_num]) + 1)
-                ws.write(row_num, col_num, str(row[col_num]), font_style)
+                ws.col(col_num).width = 256 * 40
+                if col_num == 1 and (row[col_num-1] != "Из них"):
+                    ws.write(row_num, col_num, f"{str(row[col_num])} чел.", font_style)
+                elif row[0] == "Из них":
+                    ws.write_merge(row_num, row_num, 0, 1, "Из них", font_style)
+                else:
+                    ws.write(row_num, col_num, str(row[col_num]), font_style)
 
         wb.save(response)
 

@@ -2,68 +2,25 @@
 {% load static %}
 {% load spurl %}
 {% block passage %}
-    <div class="table-responsive">
+    <div class="table-responsive" style="width: 50%; margin-left: 25%">
         <form method="POST">
             <a class="btn btn-primary" href="{% url 'export-passage' %}" role="button">Скачать отчёт</a>
-            <p></p>
+            <h2 align="center">{{ title }}</h2>
         </form>
-        {% for ter in passage_park_gorky %}
-            <h4>{{ ter.name_territory }} - {{ ter.count }} чел.</h4>
-        {% endfor %}
         <table id="tag" class="table-secondary table table-bordered table-sm align-middle table-hover">
             <thead class="align-middle table-primary">
-            <tr>
-                <th scope="col">Дата прохода</th>
-                <th scope="col">Устройство</th>
-                <th scope="col">Индификатор</th>
-            </tr>
-            </thead>
             <tbody class="table-group-divider">
-            {% for t in page_m %}
+            {% for t in passage_park_gorky %}
                 <tr class="align-middle">
-                    <td scope="row">{{ t.resolution_timestamp }}</td>
-                    <td>{{ t.id_point }}</td>
-                    <td>{{ t.identifier_value }}</td>
+                    {% if t.name_territory == "Из них" %}
+                        <td scope="row" align="center" colspan="2"><b>{{ t.name_territory }}</b></td>
+                    {% else %}
+                        <td scope="row" align="center">{{ t.name_territory }}</td>
+                        <td align="center"><b>{{ t.count }}</b> чел.</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-        <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-                {% if page_m.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link first_page" href="{% spurl query=request.GET set_query='page=1' %}">
-                            &laquo;Первая
-                        </a>
-                    </li>
-                {% endif %}
-
-                {% for pa in page_m.paginator.page_range %}
-                    {% if pa == page_m.number %}
-                        <li class="page-item">
-                            <a class="page-link active now_page"
-                               href="{% spurl query=request.GET set_query='page={{ pa }}' %}">
-                                {{ pa }}
-                            </a>
-                        </li>
-                    {% elif pa >= page_m.number|add:-2 and pa <= page_m.number|add:2 %}
-                        <li class="page-item">
-                            <a class="page-link" href="{% spurl query=request.GET set_query='page={{ pa }}' %}">
-                                {{ pa }}
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if page_m.has_next %}
-                    <li class="page-item">
-                        <a class="page-link last_page"
-                           href="{% spurl query=request.GET set_query='page={{ page_m.paginator.num_pages }}' %}">
-                            Последняя&raquo;
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
     </div>
 {% endblock %}

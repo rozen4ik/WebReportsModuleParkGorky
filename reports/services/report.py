@@ -155,8 +155,6 @@ class Report:
         access = self.get_access(request)
         config = Conf.objects.get(id=1)
         pars = Pars()
-        page_number = request.GET.get("page")
-        page_m = ""
         tariff_form = TariffTimesForm(request.GET)
         tariff_start = "00:00:00"
         tariff_stop = "00:00:00"
@@ -170,10 +168,19 @@ class Report:
         pav_baby = 0
         pav_hockey = 0
         full_price = 0
+        price_lgot_100 = 0
+        price_lgot_30 = 0
+        prig = 0
+        drive_kon = 0
+        drive_arm = 0
+        shar_kon = 0
         list_ident = []
         list_rule_use = []
+        list_result_ident = []
         fo = ""
         passage_park_gorky = PassageParkGorky.objects.all().delete()
+        title_passage_park_gorky = TitlePassageParkGorky.objects.all().delete()
+        title = ""
         data = {}
 
         if tariff_form.is_valid():
@@ -187,6 +194,10 @@ class Report:
                 fo = "yes"
                 start_d = f"{start_d} {tariff_start}"
                 end_d = f"{end_d} {tariff_stop}"
+                title_passage_park_gorky = TitlePassageParkGorky()
+                title_passage_park_gorky.title = f"Отчёт по проходам с {start_d} по {end_d}"
+                title_passage_park_gorky.save()
+                title = TitlePassageParkGorky.objects.all()[0].title
                 con = self.settings_firebird(config)
                 cur = con.cursor()
                 tables = cur.execute(
@@ -261,9 +272,10 @@ class Report:
                 con.commit()
                 con.close()
 
+                con = self.settings_firebird(config)
+                cur = con.cursor()
+
                 for i in list_ident:
-                    con = self.settings_firebird(config)
-                    cur = con.cursor()
                     tables = cur.execute(
                         "select "
                         "* "
@@ -272,10 +284,18 @@ class Report:
                     ).fetchall()
 
                     print(f"Запрос в таблицу HTML$IDENT_INFO")
-                    st = ""
-                    for i in tables:
-                        st += f"{i[0]}"
+                    list_result_ident.append(tables)
 
+                con.commit()
+                con.close()
+
+                for i in list_result_ident:
+                    st = ""
+
+                    for j in i:
+                        st += f"{j[0]}"
+
+                    print("Запрос в ФБ закончились, работа внутреннего цикла")
                     st = st.replace("charset=windows-1251", "charset=utf-8")
                     with open('result_scan_ident_info.html', 'w') as output_file:
                         output_file.write(st)
@@ -288,9 +308,6 @@ class Report:
 
                     os.remove("result_scan_ident_info.html")
 
-                    con.commit()
-                    con.close()
-
                 print(len(list_ident))
                 for i in list_rule_use:
                     if (i == "Входной билет") or (i == "Входной билет Павильон 1А") or \
@@ -298,6 +315,20 @@ class Report:
                             (i == "Входной билет Павильон 3") or (i == "Входной билет Павильон 4") or \
                             (i == "Входной билет Павильон 5"):
                         full_price += 1
+                    elif i == "Льготный 100%":
+                        price_lgot_100 += 1
+                    elif i == "Льготная стоимость 30%":
+                        price_lgot_30 += 1
+                    elif (i == "Пригласительные Пав2") or (i == "Пригласительный Все павильоны") or \
+                            (i == "Пригласительный Все павильоны 2") or (i == "Пригласительный Павильон 1А") or \
+                            (i == "Пригласительный Павильон 1Б"):
+                        prig += 1
+                    elif i == "Прокат коньков на месте":
+                        drive_kon += 1
+                    elif i == "Прокат защиты на месте":
+                        drive_arm += 1
+                    elif i == "Заточка коньков":
+                        shar_kon += 1
 
                 all_count = pav_a + pav_b + pav_2 + pav_3 + pav_4 + pav_baby + pav_hockey
                 kat = pav_a + pav_b + pav_2 + pav_3 + pav_4
@@ -312,16 +343,20 @@ class Report:
                 pars.pars_count_pav("Хоккейная площадка", pav_hockey)
                 pars.pars_count_pav("Из них", "")
                 pars.pars_count_pav("Полная стоимость", full_price)
+                pars.pars_count_pav("Льготная стоимость 100%", price_lgot_100)
+                pars.pars_count_pav("Льготная стоимость 30%", price_lgot_30)
+                pars.pars_count_pav("Пригласительные", prig)
+                pars.pars_count_pav("Прокат коньков", drive_kon)
+                pars.pars_count_pav("Прокат защиты", drive_arm)
+                pars.pars_count_pav("Заточка коньков", shar_kon)
                 passage_park_gorky = PassageParkGorky.objects.all()
-                page_model = Paginator(passages_turnstile, 50)
-                page_m = page_model.get_page(page_number)
 
             data = {
                 "access": access,
-                "page_m": page_m,
                 "fo": fo,
                 "tariff_form": tariff_form,
-                "passage_park_gorky": passage_park_gorky
+                "passage_park_gorky": passage_park_gorky,
+                "title": title
             }
         else:
             data = {}

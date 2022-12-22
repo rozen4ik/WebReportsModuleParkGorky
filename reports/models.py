@@ -158,3 +158,7 @@ class IdentSalesByTariff(models.Model):
 class PassageParkGorky(models.Model):
     name_territory = models.CharField(max_length=250, blank=True, null=True)
     count = models.CharField(max_length=250, blank=True, null=True)
+
+
+class TitlePassageParkGorky(models.Model):
+    title = models.CharField(max_length=250, blank=True, null=True)
