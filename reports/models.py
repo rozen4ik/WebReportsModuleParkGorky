@@ -162,3 +162,15 @@ class PassageParkGorky(models.Model):
 
 class TitlePassageParkGorky(models.Model):
     title = models.CharField(max_length=250, blank=True, null=True)
+
+
+class DevGroupItems(models.Model):
+    id_dg_it = models.CharField(max_length=250, blank=True, null=True)
+    id_dg = models.CharField(max_length=250, blank=True, null=True)
+    id_point = models.CharField(max_length=250, blank=True, null=True)
+
+
+class DevGroups(models.Model):
+    id_dg = models.CharField(max_length=250, blank=True, null=True)
+    caption = models.CharField(max_length=250, blank=True, null=True)
+    comment = models.CharField(max_length=250, blank=True, null=True)
