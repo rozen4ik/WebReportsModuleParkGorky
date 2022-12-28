@@ -232,25 +232,25 @@ class Report:
                     dev_group_items = DevGroupItems.objects.get(id_point=pas.id_point)
                     dev_groups = DevGroups.objects.get(id_dg=dev_group_items.id_dg)
                     if (dev_groups.caption == "П1А Входы") or (dev_groups.caption == "П1А Входы Льготные"):
-                        list_ident.append(pas.identifier_value)
+                        list_ident.append((pas.id_res, pas.identifier_value))
                         pav_a += 1
                     elif (dev_groups.caption == "П1Б Входы") or (dev_groups.caption == "П1Б Входы Льготные"):
-                        list_ident.append(pas.identifier_value)
+                        list_ident.append((pas.id_res, pas.identifier_value))
                         pav_b += 1
                     elif dev_groups.caption == "П2 Входы":
-                        list_ident.append(pas.identifier_value)
+                        list_ident.append((pas.id_res, pas.identifier_value))
                         pav_2 += 1
                     elif (dev_groups.caption == "П3 Входы") or (dev_groups.caption == "П3 Входы Льготные"):
-                        list_ident.append(pas.identifier_value)
+                        list_ident.append((pas.id_res, pas.identifier_value))
                         pav_3 += 1
                     elif dev_groups.caption == "П4(VIP) Входы":
-                        list_ident.append(pas.identifier_value)
+                        list_ident.append((pas.id_res, pas.identifier_value))
                         pav_4 += 1
                     elif dev_groups.caption == "П5 Входы":
-                        list_ident.append(pas.identifier_value)
+                        list_ident.append((pas.id_res, pas.identifier_value))
                         pav_baby += 1
                     elif dev_groups.caption == "Хоккей входы":
-                        list_ident.append(pas.identifier_value)
+                        list_ident.append((pas.id_res, pas.identifier_value))
                         pav_hockey += 1
 
                 con = self.settings_firebird(config)
@@ -269,9 +269,9 @@ class Report:
 
                 print("Запрос в IDENT$RESOLUTIONS")
 
-                for i in passages_turnstile:
+                for i in list_ident:
                     for j in tables:
-                        if int(i.id_res) == j[0]:
+                        if int(i[0]) == j[0]:
                             list_result_ident.append(j)
 
                 con = self.settings_firebird(config)
