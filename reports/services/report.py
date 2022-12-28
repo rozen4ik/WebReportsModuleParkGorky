@@ -180,6 +180,8 @@ class Report:
         fo = ""
         passage_park_gorky = PassageParkGorky.objects.all().delete()
         title_passage_park_gorky = TitlePassageParkGorky.objects.all().delete()
+        dev_group_items = DevGroupItems.objects.all()
+        dev_groups = DevGroups.objects.all()
         title = ""
         data = {}
 
@@ -225,69 +227,69 @@ class Report:
 
                 passages_turnstile = PassagesTurnstile.objects.all().order_by('resolution_timestamp')
 
-                con = self.settings_firebird(config)
-                cur = con.cursor()
-                dg_cur = con.cursor()
                 for pas in passages_turnstile:
-                    tables = cur.execute(
-                        "select "
-                        "* "
-                        "from "
-                        "DEV$GROUP_ITEMS "
-                        f"where ID_POINT = '{pas.id_point}' "
-                    ).fetchall()
-                    print("Запрос в таблицу DEV$GROUP_ITEMS")
-                    for t in tables:
-                        dg = dg_cur.execute(
-                            "select "
-                            "ID, CAPTION "
-                            "from "
-                            "DEV$GROUPS "
-                            f"where ID = '{t[1]}'"
-                        ).fetchall()
-                        print(f"Запрос в таблицу DEV$GROUPS")
-                        for d in dg:
-                            if (d[1] == "П1А Входы") or (d[1] == "П1А Входы Льготные"):
-                                list_ident.append(pas.identifier_value)
-                                pav_a += 1
-                            elif (d[1] == "П1Б Входы") or (d[1] == "П1Б Входы Льготные"):
-                                list_ident.append(pas.identifier_value)
-                                pav_b += 1
-                            elif d[1] == "П2 Входы":
-                                list_ident.append(pas.identifier_value)
-                                pav_2 += 1
-                            elif (d[1] == "П3 Входы") or (d[1] == "П3 Входы Льготные"):
-                                list_ident.append(pas.identifier_value)
-                                pav_3 += 1
-                            elif d[1] == "П4(VIP) Входы":
-                                list_ident.append(pas.identifier_value)
-                                pav_4 += 1
-                            elif d[1] == "П5 Входы":
-                                list_ident.append(pas.identifier_value)
-                                pav_baby += 1
-                            elif d[1] == "Хоккей входы":
-                                list_ident.append(pas.identifier_value)
-                                pav_hockey += 1
-
-                con.commit()
-                con.close()
+                    dev_group_items = DevGroupItems.objects.get(id_point=pas.id_point)
+                    print("Запрос в таблицу dev_group_items")
+                    dev_groups = DevGroups.objects.get(id_dg=dev_group_items.id_dg)
+                    print(f"Запрос в таблицу dev_groups")
+                    if (dev_groups.caption == "П1А Входы") or (dev_groups.caption == "П1А Входы Льготные"):
+                        list_ident.append(pas.identifier_value)
+                        pav_a += 1
+                    elif (dev_groups.caption == "П1Б Входы") or (dev_groups.caption == "П1Б Входы Льготные"):
+                        list_ident.append(pas.identifier_value)
+                        pav_b += 1
+                    elif dev_groups.caption == "П2 Входы":
+                        list_ident.append(pas.identifier_value)
+                        pav_2 += 1
+                    elif (dev_groups.caption == "П3 Входы") or (dev_groups.caption == "П3 Входы Льготные"):
+                        list_ident.append(pas.identifier_value)
+                        pav_3 += 1
+                    elif dev_groups.caption == "П4(VIP) Входы":
+                        list_ident.append(pas.identifier_value)
+                        pav_4 += 1
+                    elif dev_groups.caption == "П5 Входы":
+                        list_ident.append(pas.identifier_value)
+                        pav_baby += 1
+                    elif dev_groups.caption == "Хоккей входы":
+                        list_ident.append(pas.identifier_value)
+                        pav_hockey += 1
 
                 con = self.settings_firebird(config)
                 cur = con.cursor()
 
-                for i in list_ident:
-                    tables = cur.execute(
-                        "select "
-                        "* "
-                        "from "
-                        f"HTML$IDENT_INFO('{i}') "
-                    ).fetchall()
+                # for i in list_ident:
+                #     tables = ""
+                #     tables = cur.execute(
+                #         "select "
+                #         "ID_RU "
+                #         "from "
+                #         f"IDENT$RESOLUTIONS where IDENTIFIER_VALUE = '{i}' "
+                #     ).fetchall()
+                #     print(tables)
+                #     print(f"Запрос в таблицу HTML$IDENT_INFO")
+                #     list_result_ident.append(tables)
 
-                    print(f"Запрос в таблицу HTML$IDENT_INFO")
-                    list_result_ident.append(tables)
+                tables = cur.execute(
+                    "select "
+                    "ID_RU, IDENTIFIER_VALUE "
+                    "from "
+                    "IDENT$RESOLUTIONS "
+                    f"where RESOLUTION_TIMESTAMP >= '{start_d}' and RESOLUTION_TIMESTAMP <= '{end_d}'"
+                ).fetchall()
 
                 con.commit()
                 con.close()
+
+                print(len(list_ident))
+
+                k = 0
+                for i in tables:
+                    if i[1] == list_ident[k]:
+                        print(f"{i} - {list_ident[k]} - {k}")
+                        k += 1
+
+                for i in tables:
+                    print(i)
 
                 for i in list_result_ident:
                     st = ""
