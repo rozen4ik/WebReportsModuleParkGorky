@@ -204,22 +204,23 @@ class Report:
                 cur = con.cursor()
                 tables = cur.execute(
                     "select "
-                    "MOTION_TIMESTAMP, ID_POINT, IDENTIFIER_VALUE "
+                    "ID_RESOLUTION, MOTION_TIMESTAMP, ID_POINT, IDENTIFIER_VALUE "
                     "from "
                     "IDENT$MOTIONS "
                     f"where MOTION_TIMESTAMP >= '{start_d}' and MOTION_TIMESTAMP <= '{end_d}'"
                 ).fetchall()
 
-                print(f"Запрос в таблицу IDENT$MOTIONS")
+                print("Запрос в IDENT$MONITIONS")
 
                 passages_turnstile = PassagesTurnstile.objects.all().delete()
 
                 for i in tables:
                     passages_turnstile = PassagesTurnstile()
-                    dt = i[0].strftime("%d.%m.%Y %H:%M")
+                    passages_turnstile.id_res = i[0]
+                    dt = i[1].strftime("%d.%m.%Y %H:%M")
                     passages_turnstile.resolution_timestamp = dt
-                    passages_turnstile.id_point = i[1]
-                    passages_turnstile.identifier_value = i[2]
+                    passages_turnstile.id_point = i[2]
+                    passages_turnstile.identifier_value = i[3]
                     passages_turnstile.save()
 
                 con.commit()
@@ -229,9 +230,7 @@ class Report:
 
                 for pas in passages_turnstile:
                     dev_group_items = DevGroupItems.objects.get(id_point=pas.id_point)
-                    print("Запрос в таблицу dev_group_items")
                     dev_groups = DevGroups.objects.get(id_dg=dev_group_items.id_dg)
-                    print(f"Запрос в таблицу dev_groups")
                     if (dev_groups.caption == "П1А Входы") or (dev_groups.caption == "П1А Входы Льготные"):
                         list_ident.append(pas.identifier_value)
                         pav_a += 1
@@ -257,21 +256,9 @@ class Report:
                 con = self.settings_firebird(config)
                 cur = con.cursor()
 
-                # for i in list_ident:
-                #     tables = ""
-                #     tables = cur.execute(
-                #         "select "
-                #         "ID_RU "
-                #         "from "
-                #         f"IDENT$RESOLUTIONS where IDENTIFIER_VALUE = '{i}' "
-                #     ).fetchall()
-                #     print(tables)
-                #     print(f"Запрос в таблицу HTML$IDENT_INFO")
-                #     list_result_ident.append(tables)
-
                 tables = cur.execute(
                     "select "
-                    "ID_RU, IDENTIFIER_VALUE "
+                    "ID, ID_RU, IDENTIFIER_VALUE "
                     "from "
                     "IDENT$RESOLUTIONS "
                     f"where RESOLUTION_TIMESTAMP >= '{start_d}' and RESOLUTION_TIMESTAMP <= '{end_d}'"
@@ -280,56 +267,53 @@ class Report:
                 con.commit()
                 con.close()
 
-                print(len(list_ident))
+                print("Запрос в IDENT$RESOLUTIONS")
 
-                k = 0
-                for i in tables:
-                    if i[1] == list_ident[k]:
-                        print(f"{i} - {list_ident[k]} - {k}")
-                        k += 1
+                for i in passages_turnstile:
+                    for j in tables:
+                        if int(i.id_res) == j[0]:
+                            list_result_ident.append(j)
 
-                for i in tables:
-                    print(i)
+                con = self.settings_firebird(config)
+                cur = con.cursor()
 
+                tables = cur.execute(
+                    "select "
+                    "ID, NAME "
+                    "from "
+                    "RULE$USES "
+                ).fetchall()
+
+                con.commit()
+                con.close()
+
+                print("Запрос в RULE$USES")
+
+                final_list = []
                 for i in list_result_ident:
-                    st = ""
+                    for j in tables:
+                        if i[1] == j[0]:
+                            final_list.append((i[0], j[1], i[2]))
 
-                    for j in i:
-                        st += f"{j[0]}"
-
-                    print("Запрос в ФБ закончились, работа внутреннего цикла")
-                    st = st.replace("charset=windows-1251", "charset=utf-8")
-                    with open('result_scan_ident_info.html', 'w') as output_file:
-                        output_file.write(st)
-
-                    with open("result_scan_ident_info.html") as fp:
-                        soup = BeautifulSoup(fp, "lxml")
-
-                    trs = soup.find_all('table')[2].find_all('tr')
-                    list_rule_use.append(trs[3].find('td').text.replace('\n', ''))
-
-                    os.remove("result_scan_ident_info.html")
-
-                print(len(list_ident))
-                for i in list_rule_use:
-                    if (i == "Входной билет") or (i == "Входной билет Павильон 1А") or \
-                            (i == "Входной билет Павильон 1Б") or (i == "Входной билет Павильон 2") or \
-                            (i == "Входной билет Павильон 3") or (i == "Входной билет Павильон 4") or \
-                            (i == "Входной билет Павильон 5"):
+                for i in final_list:
+                    if (i[1] == "Входной билет") or (i[1] == "Входной билет Павильон 1А") or \
+                            (i[1] == "Входной билет Павильон 1Б") or (i[1] == "Входной билет Павильон 2") or \
+                            (i[1] == "Входной билет Павильон 3") or (i[1] == "Входной билет Павильон 4") or \
+                            (i[1] == "Входной билет Павильон 5"):
                         full_price += 1
-                    elif i == "Льготный 100%":
+                    elif i[1] == "Льготный 100%":
                         price_lgot_100 += 1
-                    elif i == "Льготная стоимость 30%":
+                    elif i[1] == "Льготная стоимость 30%":
                         price_lgot_30 += 1
-                    elif (i == "Пригласительные Пав2") or (i == "Пригласительный Все павильоны") or \
-                            (i == "Пригласительный Все павильоны 2") or (i == "Пригласительный Павильон 1А") or \
-                            (i == "Пригласительный Павильон 1Б"):
+                    elif (i[1] == "Пригласительные Пав2") or (i[1] == "Пригласительный Все павильоны") or \
+                            (i[1] == "Пригласительный Все павильоны 2") or (i[1] == "Пригласительный Павильон 1А") or \
+                            (i[1] == "Пригласительный Павильон 1Б"):
                         prig += 1
-                    elif i == "Прокат коньков на месте":
+                    elif i[1] == "Прокат коньков на месте":
                         drive_kon += 1
-                    elif i == "Прокат защиты на месте":
+                    elif i[1] == "Прокат защиты на месте":
                         drive_arm += 1
-                    elif i == "Заточка коньков":
+                    elif i[1] == "Заточка коньков":
                         shar_kon += 1
 
                 all_count = pav_a + pav_b + pav_2 + pav_3 + pav_4 + pav_baby + pav_hockey

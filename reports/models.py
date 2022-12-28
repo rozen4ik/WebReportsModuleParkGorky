@@ -18,7 +18,7 @@ class Baloon(models.Model):
 
 # Отчёт по проходам через турникет
 class PassagesTurnstile(models.Model):
-    # id_res = models.CharField(max_length=250, blank=True, null=True)
+    id_res = models.CharField(max_length=250, blank=True, null=True)
     resolution_timestamp = models.CharField(max_length=250, blank=True, null=True)
     id_point = models.CharField(max_length=250, blank=True, null=True)
     identifier_value = models.CharField(max_length=250, blank=True, null=True)
