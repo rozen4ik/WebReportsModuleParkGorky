@@ -204,7 +204,7 @@ class Report:
                 cur = con.cursor()
                 tables = cur.execute(
                     "select "
-                    "ID_RESOLUTION, MOTION_TIMESTAMP, ID_POINT, IDENTIFIER_VALUE "
+                    "ID_RESOLUTION, ID_POINT, IDENTIFIER_VALUE "
                     "from "
                     "IDENT$MOTIONS "
                     f"where MOTION_TIMESTAMP >= '{start_d}' and MOTION_TIMESTAMP <= '{end_d}'"
@@ -217,16 +217,15 @@ class Report:
                 for i in tables:
                     passages_turnstile = PassagesTurnstile()
                     passages_turnstile.id_res = i[0]
-                    dt = i[1].strftime("%d.%m.%Y %H:%M")
-                    passages_turnstile.resolution_timestamp = dt
-                    passages_turnstile.id_point = i[2]
-                    passages_turnstile.identifier_value = i[3]
+                    passages_turnstile.resolution_timestamp = "dt"
+                    passages_turnstile.id_point = i[1]
+                    passages_turnstile.identifier_value = i[2]
                     passages_turnstile.save()
 
                 con.commit()
                 con.close()
 
-                passages_turnstile = PassagesTurnstile.objects.all().order_by('resolution_timestamp')
+                passages_turnstile = PassagesTurnstile.objects.all()
 
                 for pas in passages_turnstile:
                     dev_group_items = DevGroupItems.objects.get(id_point=pas.id_point)
